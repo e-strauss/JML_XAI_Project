@@ -7,12 +7,14 @@
 
 
 # Running Unit Tests
+1. **clone the repo and open it in VSCode:**
+   - git clone git@github.com:e-strauss/JML_XAI_Project.git
+   - open the folder in VSCode or run "code ." in your terminal
 
-
-1. **Activate Your Package Environment:**
-   - Open your terminal and navigate to your package directory.
-   - Start the Julia REPL (Read-Eval-Print Loop): Typing Alt+j Alt+o (option+j option+o on macOS) opens a Julia REPL and directly activates your local environment. If this doesn't work on the first try, you might have to manually select your "Julia env" in the bottom bar of VSCode once.
+2. **Activate Your Package Environment:**
+   - Typing Alt+j Alt+o (option+j option+o on macOS) opens a Julia REPL and directly activates your local environment
+   - If this doesn't work on the first try, you might have to manually select your "Julia env" [JML_XAI_Project] in the bottom bar of VSCode once
    - Enter package mode by typing `]`
 
-2. **Run the Tests:**
-   - While still in package mode, execute the `test` command:
+3. **Run the Tests:**
+   - While still in package mode, execute the `test` command

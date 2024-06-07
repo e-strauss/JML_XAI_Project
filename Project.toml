@@ -3,5 +3,16 @@ uuid = "420e0033-0f21-4de1-b2f6-9ca66682466f"
 authors = ["Elias Strauss lathancer@gmx.de"]
 version = "1.0.0-DEV"
 
+[deps]
+BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
+ExplainableAI = "4f1bc3e1-d60d-4ed0-9367-9bdff9846d3b"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
+ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
+ImageShow = "4e3cecfd-b093-5904-9786-8bbb286a6a31"
+MLDatasets = "eb30cadb-4394-5ae3-aed4-317e484a6458"
+RelevancePropagation = "0be6dd02-ae9e-43eb-b318-c6e81d6890d8"
+VisionHeatmaps = "27106da1-f8bc-4ca8-8c66-9b8289f1e035"
+
 [compat]
 julia = "1.10"

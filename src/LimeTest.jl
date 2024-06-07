@@ -1,6 +1,6 @@
 
 
 # Write your package code here.
-function time(x)
-      x
+function lime(x)
+    return 8
 end

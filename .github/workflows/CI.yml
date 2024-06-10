@@ -34,6 +34,8 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
+      - name: Install unregistered dependencies
+        run: julia -e 'using Pkg; Pkg.add(url="https://github.com/simonster/LARS.jl"); Pkg.instantiate()'
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1

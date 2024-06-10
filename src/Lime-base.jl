@@ -1,44 +1,73 @@
-"""Selects features for the model. see explain_instance_with_data to
-understand the parameters."""
+"""
+    sample_data(x_0::Vector, model)
 
-function feature_selection()
+Returns the neighborhood_data (perturbed data, first element is the original data point) by sampling around x_0 
+and evaluate the model to generate the corresponding perturbed labels.
+"""
+
+function sample_data(x_0, model)
+    #TODO
+end
+
+"""
+    normalize_data(X::Matrix, y::Vector, weights::Vector)
+
+Returns the weight normalization of X and y using the weight vector y.
+X_norm = ((X - np.average(X, axis=0, weights=weights)) * np.sqrt(weights[:, np.newaxis]))
+Y_norm = ((y - np.average(y, weights=weights)) * np.sqrt(weights))
+"""
+
+function weighted_data(X, y, weights)
+    #TODO
+end
+
+"""
+    feature_selection(X::Matrix, y::Vector, max_feat::Int) -> ReturnType
+
+Selects features for the model using LARS with Lasso s.t. len(selected_features) <= max_feat
+
+nonzero = range(weighted_data.shape[1])
+coefs = generate_lars_path(X, y)
+for i in range(len(coefs.T) - 1, 0, -1):
+    nonzero = coefs.T[i].nonzero()[0]
+    if len(nonzero) <= num_features:
+        return nonzero
+
+# Parameters
+- `X`: weighted feature
+- `y`: weighted labels
+
+# Returns
+- indices of selected features
+"""
+
+function feature_selection(X, y, max_feat)
+    #TODO
+end
+
+"""
+train_ridge_regressor(X::Matrix, y::Vector, weights::Vector)
+
+Returns the trained simplified linear model using ridge regression:
+model = Ridge(alpha=1, fit_intercept=True, random_state=self.random_state)
+model.fit(X,y, sample_weight=weights)
+return model
+"""
+
+function train_ridge_regressor(X, y, weights, model)
     #TODO
 end
 
 """Takes perturbed data, labels and distances, returns explanation.
 
-Args:
-neighborhood_data: perturbed data, 2d array. first element is
-assumed to be the original data point.
-neighborhood_labels: corresponding perturbed labels. should have as
-many columns as the number of possible labels.
-distances: distances to original data point.
-label: label for which we want an explanation
-num_features: maximum number of features in explanation
-feature_selection: how to select num_features. options are:
-'forward_selection': iteratively add features to the model.
-This is costly when num_features is high
-'highest_weights': selects the features that have the highest
-product of absolute weight * original data point when
-learning with all the features
-'lasso_path': chooses features based on the lasso
-regularization path
-'none': uses all features, ignores num_features
-'auto': uses forward_selection if num_features <= 6, and
-'highest_weights' otherwise.
-model_regressor: sklearn regressor to use in explanation.
-Defaults to Ridge regression if None. Must have
-model_regressor.coef_ and 'sample_weight' as a parameter
-to model_regressor.fit()
+# Parameters
+- `neighborhood_data`: perturbed data, 2d array. 
+- `neighborhood_labels`: corresponding perturbed labels. should have as many columns as the number of possible labels.
+- `distances`: distances to original data point.
+- `label`: label for which we want an explanation
+- `num_features`: maximum number of features in explanation
+- `model_regressor`: sklearn regressor to use in explanation. Defaults to Ridge regression if None. Must have model_regressor.coef_ and 'sample_weight' as a parameter to model_regressor.fit()
 
-Returns:
-(intercept, exp, score, local_pred):
-intercept is a float.
-exp is a sorted list of tuples, where each tuple (x,y) corresponds
-to the feature id (x) and the local weight (y). The list is sorted
-by decreasing absolute value of y.
-score is the R^2 value of the returned explanation
-local_pred is the prediction of the explanation model on the original instance
 """
 
 function explain_instance_with_data(self,
@@ -47,9 +76,13 @@ function explain_instance_with_data(self,
     distances,
     label,
     num_features,
-    feature_selection="auto",
     model_regressor=None)
-    #TODO
+    
+    weights = self.kernel_fn(distances)
+    X = neighborhood_data
+    y = neighborhood_labels[:, label]
+    X_norm, y_norm = weighted_data(X, y, weights)
+    selected_features = feature_selection(X_norm, y_norm, num_features)
+    simplified_model = train_ridge_regressor(X[selected_features], y, weights, model_regressor)
+    #TODO: use simplified model for explanation
 end
-
-

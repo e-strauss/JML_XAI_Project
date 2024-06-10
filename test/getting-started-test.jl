@@ -6,12 +6,12 @@ using CSV
 using DataFrames
 using RelevancePropagation
 
-df = CSV.read("../src/MNIST_input_9.csv", DataFrame)
+df = CSV.read("../data/MNIST_input_9.csv", DataFrame)
 x = Matrix(df)
 y = 9
 input = reshape(x, 28, 28, 1, :);
 
-model = BSON.load("../src/model.bson", @__MODULE__)[:model]
+model = BSON.load("../data/model.bson", @__MODULE__)[:model]
 analyzer = LRP(model)
 expl = analyze(input, analyzer);
 

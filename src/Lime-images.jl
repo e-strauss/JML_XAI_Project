@@ -29,7 +29,6 @@ Args:
     random_seed: integer used as random seed for the segmentation
         algorithm. If None, a random integer, between 0 and 1000,
         will be generated using the internal random number generator.
-    progress_bar: if True, show tqdm progress bar.
 
 Returns:
     An ImageExplanation object (see lime_image.py) with the corresponding
@@ -45,5 +44,5 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
     model_regressor=None,
     random_seed=None,)
     
-    #TODO reference to python implemenation ../python-reference/lime-image.py
+    #TODO reference to python implementation ../python-reference/lime-image.py
 end 

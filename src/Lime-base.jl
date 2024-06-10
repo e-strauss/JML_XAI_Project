@@ -84,5 +84,10 @@ function explain_instance_with_data(self,
     X_norm, y_norm = weighted_data(X, y, weights)
     selected_features = feature_selection(X_norm, y_norm, num_features)
     simplified_model = train_ridge_regressor(X[selected_features], y, weights, model_regressor)
-    #TODO: use simplified model for explanation
+    #TODO: use weights of the simplified linear model for the explanation: 
+    #       - high, positive weight -> positive attribution
+    #       - high, negative weight -> negative attribution
+    #       - low, positive or negative OR features, that were not selected by feature selection -> low attribution
 end
+
+export explain_instance_with_data

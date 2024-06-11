@@ -5,6 +5,8 @@ struct LIME{M} <: AbstractXAIMethod
     model::M    
 end
 
+
+#implementation of LIME XAI method based on https://arxiv.org/pdf/1602.04938
 function (method::LIME)(input, output_selector::AbstractOutputSelector)
     output = method.model(input)
     output_selection = output_selector(output)

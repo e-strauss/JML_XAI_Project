@@ -1,8 +1,25 @@
 """
-    sample_data(x_0::Vector, model)
+    sample_data(x0::Vector, x0_pertubed::Vector, H, D, model)
 
-Returns the neighborhood_data (perturbed data, first element is the original data point) by sampling around x_0 
+Returns the neighborhood_data (perturbed data, first element is the original data point) by sampling around x0 
 and evaluate the model to generate the corresponding perturbed labels.
+
+Citation from Paper [https://arxiv.org/pdf/1602.04938]:
+We sample instances around x0_pertubed by drawing nonzero elements of x0_pertubed uniformly at random (where the number of such draws is also uniformly sampled).
+We sample instances both in the vicinity of x0 and far away from x (measured by the distance metric).
+
+
+# Parameters
+- `x0`: original input
+- `x0_pertubed`: interpretable representation of original input
+- `H`: interpretable representation mapping function, s.t. h(x0_pertubed) = x0
+- `D`: distance metric which calculates the distance of two points in the origial, non-interpretable space
+- `model`: model which works on the non-interpretable original input
+
+# Returns
+- `neighborhood_data`: sampled perturbed data (first element is x0_pertubed)
+- `neighborhood_labels`: corresponding perturbed calculated by the model and mapping function H
+- `distances`: distances of each sampled point to original data point calculated using the distance metric D and mapping function H
 """
 
 function sample_data(x_0, model)
@@ -25,8 +42,10 @@ end
 """
     feature_selection(X::Matrix, y::Vector, max_feat::Int) -> ReturnType
 
-Selects features for the model using LARS with Lasso s.t. len(selected_features) <= max_feat
+Selects features for the model using LARS with Lasso [https://tibshirani.su.domains/ftp/lars.pdf] s.t. len(selected_features) <= max_feat
+Use LARS package: https://github.com/simonster/LARS.jl
 
+Python reference:
 nonzero = range(weighted_data.shape[1])
 coefs = generate_lars_path(X, y)
 for i in range(len(coefs.T) - 1, 0, -1):
@@ -63,10 +82,10 @@ end
 """Takes perturbed data, labels and distances, returns explanation.
 
 # Parameters
-- `neighborhood_data`: perturbed data, 2d array. 
+- `neighborhood_data`: perturbed data
 - `neighborhood_labels`: corresponding perturbed labels. should have as many columns as the number of possible labels.
 - `distances`: distances to original data point.
-- `kernel_fn`: kernel function that transforms an array of distances into an array of proximity values (floats)
+- `kernel_fn`: (similiarity) kernel function that transforms an array of distances into an array of proximity values (floats)
 - `label`: label for which we want an explanation
 - `num_features`: maximum number of features in explanation
 - `model_regressor`: sklearn regressor to use in explanation. Defaults to Ridge regression if None. Must have model_regressor.coef_ and 'sample_weight' as a parameter to model_regressor.fit()
@@ -74,12 +93,23 @@ end
 """
 
 function explain_instance_with_data(neighborhood_data,neighborhood_labels,distances,kernel_fn,label,num_features,model_regressor=nothing)
+    #calculate weights using similiarity kernel function 
     weights = kernel_fn(distances)
+
     X = neighborhood_data
+
+    #selcted the label we want to calculate the explanation
     y = neighborhood_labels[:, label]
+
+    #reference: python_reference/lime-base-reference.py:116
     X_norm, y_norm = weighted_data(X, y, weights)
+
+    #select a subset of the features
     selected_features = feature_selection(X_norm, y_norm, num_features)
+
+    #train a linear model on simplified features
     simplified_model = train_ridge_regressor(X[selected_features], y, weights, model_regressor)
+    
     #TODO: use weights of the simplified linear model for the explanation: 
     #       - high, positive weight -> positive attribution
     #       - high, negative weight -> negative attribution

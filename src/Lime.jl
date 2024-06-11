@@ -14,7 +14,7 @@ function (method::LIME)(input, output_selector::AbstractOutputSelector)
     kernel_fn = identity
     max_features = length(input)
     distances = [0]
-    #TODO: use Lime-base for explanation
+    #TODO:  replace "dummy" values with meaniningful values
     #       - create actual samples around the point input, compute labels and distances 
     #       - specify a kernel function that transforms an array of distances into an array of proximity values
     #       - specify a maximum num feature of features for the simpliefied model

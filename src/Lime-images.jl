@@ -1,3 +1,5 @@
+using ImageSegmentation: felzenszwalb
+
 """Generates explanations for a prediction.
 
 First, we generate neighborhood data by randomly perturbing features
@@ -43,6 +45,77 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
     distance_metric="cosine",
     model_regressor=None,
     random_seed=None,)
-    
+
+    # get segmentation function
+    segmentation_fn = default_segmentation_function("felzenszwalb", nothing)
+
+    # get segmentation label map
+    seg_labels_map = segmentation_fn(image)
+
+    # Make a copy of the image
+    fudged_image = copy(image)
+
+    # do we need this?
+    if hide_color === nothing
+
+
+        for segment_label in unique(seg_labels_map)
+
+            # create mask of segment label to isolate segment in next step
+            mask = labels_map(seg_labels_map) .== segment_label
+
+            # calculate mean of segment
+            mean_color = mean(image_matrix[mask, :], dims=1)
+            
+            # Broadcast the mean color to all pixels in the current segment
+            fudged_image[mask, :] .= mean_color
+        end
+    end
+    # more info in felzenszwalb_demo.jl
+
+
     #TODO reference to python implementation ../python-reference/lime-image.py
 end 
+
+"""
+return image segmantation function, if no function was passed
+originally based on Scikit-Image implementation
+julia adaptations:
+
+quickshift
+- package: ??? (docs: ???)
+- explaination: ???
+- python packages can be used in julia, it's therefore possible to use the scikit-image library if desired
+
+slic
+- code: https://github.com/Cuda-Chen/SLIC.jl/tree/master (docs: NOT EVEN AN INOFFICIAL PACKAGE)
+- code seems to work, but spelling mistakes in the original and takes forever
+- explaination: https://cuda-chen.github.io/image%20processing/2020/07/29/slic-in-julia.html
+
+felzenszwalb
+- package: ImageSegmentation (docs: https://juliaimages.org/v0.21/imagesegmentation/)
+- explaination: https://www.analyticsvidhya.com/blog/2021/05/image-segmentation-with-felzenszwalbs-algorithm/
+
+comparision: https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_segmentations.html
+
+Args:
+    algo_type: string, segmentation algorithm among the following:
+        'quickshift', 'slic', 'felzenszwalb'
+    target_params: dict, algorithm parameters (valid model paramters
+        as define in Scikit-Image documentation)
+
+
+"""
+function default_segmentation_function(algo_type::String, target_params::AbstractVector{})
+
+    if algo_type== "felzenszwalb"
+        function segmentation_func(img)
+            return labels_map(felzenszwalb(img, 10, 4))
+        
+        end
+
+    else
+        error("Not a valid segmentation function!")
+    end
+    return segmentation_func
+end

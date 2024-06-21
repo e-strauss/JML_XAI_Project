@@ -29,14 +29,19 @@ end
 """
     normalize_data(X::Matrix, y::Vector, weights::Vector)
 
-Returns the weight normalization of X and y using the weight vector y.
+Returns the weight normalization of X (data) and y (label) using the weight vector y.
 X_norm = ((X - np.average(X, axis=0, weights=weights)) * np.sqrt(weights[:, np.newaxis]))
 Y_norm = ((y - np.average(y, weights=weights)) * np.sqrt(weights))
 """
 
 function weighted_data(X, y, weights)
-    #TODO
-    return nothing, nothing
+    X = [1 2 3; 4 5 6; 7 8 9]
+    weights = [0.2, 0.5, 0.3]
+
+    y =[1,2,3]
+    X_norm =(X.-(sum(X .* weights, dims=1)./ sum(weights))) .* sqrt.(weights)
+    Y_norm = (y .-(sum(y.*weights)./sum(weights))) .* sqrt.(weights)
+    return X_norm, Y_norm
 end
 
 """

@@ -59,16 +59,17 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
     if hide_color === nothing
 
 
-        for segment_label in unique(seg_labels_map)
-
-            # create mask of segment label to isolate segment in next step
-            mask = labels_map(seg_labels_map) .== segment_label
-
-            # calculate mean of segment
-            mean_color = mean(image_matrix[mask, :], dims=1)
+        for segment_label in unique(labels_map(segments))
+            mask = labels_map(segments) .== segment_label
+        
+            mean_color = RGB(
+                mean([red(c) for c in image[mask]]),
+                mean([green(c) for c in image[mask]]),
+                mean([blue(c) for c in image[mask]])
+            )
             
-            # Broadcast the mean color to all pixels in the current segment
-            fudged_image[mask, :] .= mean_color
+            # Apply the mean color to all pixels in the current segment
+            fudged_image[mask] .= mean_color
         end
     end
     # more info in felzenszwalb_demo.jl
@@ -106,12 +107,11 @@ Args:
 
 
 """
-function default_segmentation_function(algo_type::String, target_params::AbstractVector{})
+function default_segmentation_function(algo_type::String, target_params::AbstractVector{} = nothing)
 
     if algo_type== "felzenszwalb"
         function segmentation_func(img)
-            return labels_map(felzenszwalb(img, 10, 4))
-        
+            return labels_map(felzenszwalb(img, 10, 100))
         end
 
     else

@@ -4,5 +4,5 @@ using Test
 
 @testset "JML_XAI_Project.jl" begin
     #sanity check on the getting started tutorial
-    include("Lime_images_tests.jl")
+    include("Lime-images-tests.jl")
 end

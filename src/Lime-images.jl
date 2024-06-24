@@ -47,7 +47,7 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
     random_seed=None,)
 
     # get segmentation function
-    segmentation_fn = default_segmentation_function("felzenszwalb", nothing)
+    segmentation_fn = default_segmentation_function("felzenszwalb")
 
     # get segmentation label map
     seg_labels_map = segmentation_fn(image)
@@ -59,8 +59,8 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
     if hide_color === nothing
 
 
-        for segment_label in unique(labels_map(segments))
-            mask = labels_map(segments) .== segment_label
+        for segment_label in unique(seg_labels_map)
+            mask = seg_labels_map .== segment_label
         
             mean_color = RGB(
                 mean([red(c) for c in image[mask]]),
@@ -107,7 +107,7 @@ Args:
 
 
 """
-function default_segmentation_function(algo_type::String, target_params::AbstractVector{} = nothing)
+function default_segmentation_function(algo_type::String)
 
     if algo_type== "felzenszwalb"
         function segmentation_func(img)

@@ -17,7 +17,7 @@ display(image)
 #   mean color and number of pixels in each segment: segment_mean(segments)
 
 #docs: https://juliaimages.org/v0.21/function_reference/#ImageSegmentation.felzenszwalb
-segments = felzenszwalb(image, 10, 100)
+seg_labels_map = labels_map(felzenszwalb(image, 10, 100))
 
 #colored_segments_image = create_image(labels_map(segments), nothing)
 # image showing the segments should be opened when executing this file
@@ -27,11 +27,11 @@ segments = felzenszwalb(image, 10, 100)
 # actual usage in code:
 fudged_image = copy(image)
 
-print(length(unique(labels_map(segments))))
+print(length(unique(seg_labels_map)))
 
 # iterate over segments
-for segment_label in unique(labels_map(segments))
-    mask = labels_map(segments) .== segment_label
+for segment_label in unique(seg_labels_map)
+    mask = seg_labels_map .== segment_label
     
     mean_color = RGB(
         mean([red(c) for c in image[mask]]),

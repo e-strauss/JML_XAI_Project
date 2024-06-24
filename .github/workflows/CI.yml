@@ -35,6 +35,8 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v2
+      - name: CHeck directories
+        run: ls /home/runner/work/JML_XAI_Project/JML_XAI_Project
       - name: Install unregistered dependencies
         run: julia --project "/home/runner/work/JML_XAI_Project/JML_XAI_Project" -e 'using Pkg; Pkg.add(url="https://github.com/simonster/LARS.jl"); Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@v1

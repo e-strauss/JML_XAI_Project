@@ -75,8 +75,11 @@ model.fit(X,y, sample_weight=weights)
 return model
 """
 
-function train_ridge_regressor(X, y, weights, model)
-    #TODO
+function train_ridge_regressor(X, y, lam=1, sample_weights=I)
+	if sample_weights != I
+		W = Diagonal(sample_weights)
+	end
+    return inv(X'*W*X + lam*I)*X'*W*y
 end
 
 """Takes perturbed data, labels and distances, returns explanation.

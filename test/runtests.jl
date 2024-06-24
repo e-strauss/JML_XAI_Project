@@ -5,4 +5,5 @@ using Test
     #sanity check on the getting started tutorial
     include("getting-started-test.jl")
     include("lime_xai_test.jl")
+    include("lars_path_test.jl")
 end

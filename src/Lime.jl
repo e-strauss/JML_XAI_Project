@@ -16,7 +16,7 @@ function (method::LIME)(input, output_selector::AbstractOutputSelector)
     samples = reshape(input, 1, size(input)...)
     labels = transpose(output)
     kernel_fn = (x) -> 1 .- x
-    max_features = length(input)
+    max_features = length(input) / 6
     distances = [0]
     #TODO:  replace "dummy" values with meaniningful values
     #       - create actual samples around the point input, compute labels and distances 

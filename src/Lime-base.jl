@@ -1,5 +1,6 @@
 import LinearAlgebra.I
 import LinearAlgebra.Diagonal
+import LARS.lars
 
 """
     sample_data(x0::Vector, x0_pertubed::Vector, H, D, model)
@@ -39,7 +40,7 @@ Y_norm = ((y - np.average(y, weights=weights)) * np.sqrt(weights))
 
 function weighted_data(X, y, weights)
     #TODO
-    return nothing, nothing
+    return X, y
 end
 
 """
@@ -65,8 +66,15 @@ for i in range(len(coefs.T) - 1, 0, -1):
 """
 
 function feature_selection(X, y, max_feat)
-    #TODO
-    return [1, 2]
+    c = lars(X, y; method=:lasso, intercept=false, standardize=true, lambda2=0.0,use_gram=false, maxiter=500, lambda_min=0.0, verbose=false)
+    #display(c.coefs)
+    i = size(c.coefs)[2]
+    nnz_indices = findall(!iszero, c.coefs[:, i])
+    while length(nnz_indices) > max_feat && i > 1
+        i = i - 1
+        nnz_indices = findall(!iszero, c.coefs[:, i])
+    end
+    return nnz_indices
 end
 
 """
@@ -125,3 +133,5 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     # replace return rand(size(neighborhood_data[1])...) with model weigths when it's working
     return rand(size(neighborhood_data)[2:end]...) 
 end
+
+export feature_selection

@@ -1,3 +1,6 @@
+import LinearAlgebra.I
+import LinearAlgebra.Diagonal
+
 """
     sample_data(x0::Vector, x0_pertubed::Vector, H, D, model)
 
@@ -63,7 +66,7 @@ for i in range(len(coefs.T) - 1, 0, -1):
 
 function feature_selection(X, y, max_feat)
     #TODO
-    return [1]
+    return [1, 2]
 end
 
 """
@@ -76,10 +79,12 @@ return model
 """
 
 function train_ridge_regressor(X, y, lam=1, sample_weights=I)
-	if sample_weights != I
+	W = I
+    if sample_weights != I
 		W = Diagonal(sample_weights)
 	end
-    return inv(X'*W*X + lam*I)*X'*W*y
+    lam = Diagonal(fill(lam, size(X)[2]))
+    return inv(X'*W*X + lam)*X'*W*y
 end
 
 """Takes perturbed data, labels and distances, returns explanation.
@@ -95,12 +100,12 @@ end
 
 """
 
-function explain_instance_with_data(neighborhood_data,neighborhood_labels,distances,kernel_fn,label,num_features,model_regressor=nothing)
+function explain_instance_with_data(neighborhood_data,neighborhood_labels,distances,kernel_fn,label,num_features)
     #calculate weights using similiarity kernel function 
     weights = kernel_fn(distances)
 
     X = neighborhood_data
-
+    @info size(X)
     #selcted the label we want to calculate the explanation
     y = neighborhood_labels[:, label]
 
@@ -111,7 +116,7 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     selected_features = feature_selection(X_norm, y_norm, num_features)
 
     #train a linear model on simplified features
-    simplified_model = train_ridge_regressor(X[selected_features], y, weights, model_regressor)
+    simplified_model = train_ridge_regressor(X[:, selected_features], y,1, weights)
     
     #TODO: use weights of the simplified linear model for the explanation: 
     #       - high, positive weight -> positive attribution

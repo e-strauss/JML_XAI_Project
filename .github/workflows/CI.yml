@@ -62,8 +62,8 @@ jobs:
         with:
           version: '1'
       - uses: julia-actions/cache@v2
-      - name: cat docs/Project.toml
-        run: cat docs/Project.toml
+      - name: Install unregistered dependencies
+        run: julia --project="/home/runner/work/JML_XAI_Project/JML_XAI_Project" -e 'using Pkg; Pkg.add(url="https://github.com/e-strauss/LARS.jl"); Pkg.instantiate()'
       - name: remove LARS dependency
         run: sed -i '/^LARS/d' docs/Project.toml
       - name: cat docs/Project.toml

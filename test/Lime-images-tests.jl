@@ -10,5 +10,5 @@ desired_function(img) = labels_map(felzenszwalb(img, 10, 100))
 
 
 @testset "import-correct-segmentation-function" begin
-    @test segmentation_fn === segmentation_fn
+    @test segmentation_fn == desired_function
 end

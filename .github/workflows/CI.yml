@@ -62,8 +62,12 @@ jobs:
         with:
           version: '1'
       - uses: julia-actions/cache@v2
+      - name: cat docs/Project.toml
+        run: cat docs/Project.toml
       - name: remove LARS dependency
         run: sed -i '/^LARS/d' docs/Project.toml
+      - name: cat docs/Project.toml
+        run: cat docs/Project.toml
       - name: Configure doc environment
         shell: julia --project=docs --color=yes {0}
         run: |

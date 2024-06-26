@@ -13,5 +13,5 @@ using Test
     lambda = 2
 
     @test train_ridge_regressor(X, y) ≈ [57//71 -28//71; -28//71 15//71]*[34, 68]
-    @test train_ridge_regressor(X,y; lamb=lambda, sample_weights=w) ≈ [117//292 -58//292; -58//292 30//292]*[146, 292]
+    @test train_ridge_regressor(X,y; lam=lambda, sample_weights=w) ≈ [117//292 -58//292; -58//292 30//292]*[146, 292]
 end

@@ -63,7 +63,9 @@ jobs:
           version: '1'
       - uses: julia-actions/cache@v2
       - name: remove LARS dependency
-        run: sed -i '/^LARS/d' Project.toml
+        run:  |
+          cp Project.toml Project_backup.toml
+          sed -i '/^LARS/d' Project.toml
       #- name: Install unregistered dependencies
       #  run: julia --project="/home/runner/work/JML_XAI_Project/JML_XAI_Project" -e 'using Pkg; Pkg.add(url="https://github.com/e-strauss/LARS.jl"); Pkg.instantiate()'
       - name: remove LARS dependency
@@ -78,6 +80,8 @@ jobs:
           Pkg.add(url="https://github.com/e-strauss/LARS.jl")
           Pkg.instantiate()
       - uses: julia-actions/julia-buildpkg@v1
+      - name: add LARS dependency again
+        run:  mv Project_backup.toml Project.toml
       - uses: julia-actions/julia-docdeploy@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

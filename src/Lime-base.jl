@@ -35,14 +35,13 @@ Y_norm = ((y - np.average(y, weights=weights)) * np.sqrt(weights))
 """
 
 function weighted_data(X, y, weights)
-    X = [1 2 3; 4 5 6; 7 8 9]
-    weights = [0.2, 0.5, 0.3]
 
-    y =[1,2,3]
     X_norm =(X.-(sum(X .* weights, dims=1)./ sum(weights))) .* sqrt.(weights)
     Y_norm = (y .-(sum(y.*weights)./sum(weights))) .* sqrt.(weights)
     return X_norm, Y_norm
 end
+
+export(weighted_data)
 
 """
     feature_selection(X::Matrix, y::Vector, max_feat::Int) -> ReturnType

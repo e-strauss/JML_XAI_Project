@@ -1,4 +1,5 @@
 using ImageSegmentation: felzenszwalb
+using Images
 
 """Generates explanations for a prediction.
 
@@ -76,6 +77,12 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
 
 
     #TODO reference to python implementation ../python-reference/lime-image.py
+
+    top = labels
+
+    data, labels = data_labels(#=TODO=#)
+    
+
 end 
 
 """
@@ -118,4 +125,58 @@ function default_segmentation_function(algo_type::String)
         error("Not a valid segmentation function!")
     end
     return segmentation_func
+end
+
+
+"""
+Generates perturbed versions of a given image by turning superpixels on or off,using a specified 
+segmentation map. It then predicts the class probabilities for these perturbed images using a provided 
+classifier function. The function returns a tuple containing the binary matrix of perturbed images (data) 
+and their corresponding prediction probabilities (labels). This is useful for techniques like LIME to 
+understand and explain model predictions locally.
+"""
+function data_labels(image, fudged_image, segments, classifier_fn, num_samples, batch_size=10,
+    progress_bar=True)
+    #number of features/segments in segmented image
+    n_features = length(unique(segments))
+
+    # binary matrix consisting of vectors if features turned on/off
+    data = reshape(rand(0:1, n_features*num_samples), num_samples, n_features)
+    
+    labels = Array{}
+
+    # make first row all 1s / all features enabled
+    data[1 ,:] .= 1
+
+    imgs = Array{}
+    num_rows = size(matrix, 1)
+
+    for i in 1:num_rows
+        row = data[i, :]
+        tmp =  copy(image)
+
+        #find all indexes where a 0 occours
+        zeros_indexes = findall(x -> x == 0, row)
+        mask = zeros(Int, n_features, num_samples)
+
+        # go over all segments (pixels of same segments should have same value in the segments map, ranging from 1 to number_of_segments)
+        for zero_index in zeros_indexes
+            mask[segments == zero_index] .= True
+
+        tmp[mask] = fudged_image[mask]
+
+        append!(imgs, tmp)
+
+        if length(imgs) == batch_size
+            preds = classifier_fn(imgs)
+            append!(labels, preds)
+            imgs = Array{}
+        end
+
+        #todo
+
+        end
+    
+    end
+
 end

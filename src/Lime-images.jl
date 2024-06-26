@@ -135,48 +135,57 @@ classifier function. The function returns a tuple containing the binary matrix o
 and their corresponding prediction probabilities (labels). This is useful for techniques like LIME to 
 understand and explain model predictions locally.
 """
-function data_labels(image, fudged_image, segments, classifier_fn, num_samples, batch_size=10,
-    progress_bar=True)
+function data_labels(image, fudged_image, segments, classifier_fn, num_samples, batch_size=10)
+
     #number of features/segments in segmented image
     n_features = length(unique(segments))
 
-    # binary matrix consisting of vectors if features turned on/off
+    # binary matrix consisting of (row) vectors describing if feature is replaced or not
     data = reshape(rand(0:1, n_features*num_samples), num_samples, n_features)
     
-    labels = Array{}
+    labels = []
 
     # make first row all 1s / all features enabled
     data[1 ,:] .= 1
 
-    imgs = Array{}
-    num_rows = size(matrix, 1)
+    imgs = []
 
-    for i in 1:num_rows
-        row = data[i, :]
+    for  row in eachrow(data)
+
         tmp =  copy(image)
 
-        #find all indexes where a 0 occours
+        #find all indexes where a 0 occours (this indexes will later correspond to specific features)
         zeros_indexes = findall(x -> x == 0, row)
-        mask = zeros(Int, n_features, num_samples)
 
-        # go over all segments (pixels of same segments should have same value in the segments map, ranging from 1 to number_of_segments)
+        # n_features x num_samples BitMatrix of type all 0 (false)
+        mask = falses(size(segments)...)
+
+        # go over all segments that are supposed to be replaced and add them all together
+        # (pixels of same segments should have same value in the segments map, ranging from 1 to total_number_of_segments)
+        # represent each pixel to be replaced by a 1
         for zero_index in zeros_indexes
-            mask[segments == zero_index] .= True
+            mask .= mask .| (segments .== zero_index)
+        end
 
+        # replace marked parts in copy of original image
         tmp[mask] = fudged_image[mask]
 
-        append!(imgs, tmp)
+        push!(imgs, tmp)
 
+        # if batch size is reached: add predictions to labels and empty imgs
         if length(imgs) == batch_size
             preds = classifier_fn(imgs)
-            append!(labels, preds)
-            imgs = Array{}
+            push!(labels, preds)
+            imgs = Array[]
         end
-
-        #todo
-
-        end
-    
     end
 
+    # add predictions to labels and empty imgs if not alreadydone
+    if length(imgs) > 0
+        preds = classifier_fn(imgs)
+        push!(labels, preds)
+    end
+
+    print(typeof(data), typeof(labels))
+    return data, labels
 end

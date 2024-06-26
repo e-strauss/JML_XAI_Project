@@ -4,6 +4,7 @@
 /Manifest.toml
 /test/Manifest.toml
 /docs/Manifest.toml
+/demo/Manifest.toml
 /docs/build/
 /.vscode/*
 /dump*

@@ -1,3 +1,7 @@
+import LinearAlgebra.I
+import LinearAlgebra.Diagonal
+import LARS.lars
+
 """
     sample_data(x0::Vector, x0_pertubed::Vector, H, D, model)
 
@@ -35,7 +39,6 @@ Y_norm = ((y - np.average(y, weights=weights)) * np.sqrt(weights))
 """
 
 function weighted_data(X, y, weights)
-
     X_norm =(X.-(sum(X .* weights, dims=1)./ sum(weights))) .* sqrt.(weights)
     Y_norm = (y .-(sum(y.*weights)./sum(weights))) .* sqrt.(weights)
     return X_norm, Y_norm
@@ -66,8 +69,15 @@ for i in range(len(coefs.T) - 1, 0, -1):
 """
 
 function feature_selection(X, y, max_feat)
-    #TODO
-    return [1]
+    c = lars(X, y; method=:lasso, intercept=false, standardize=true, lambda2=0.0,use_gram=false, maxiter=500, lambda_min=0.0, verbose=false)
+    #display(c.coefs)
+    i = size(c.coefs)[2]
+    nnz_indices = findall(!iszero, c.coefs[:, i])
+    while length(nnz_indices) > max_feat && i > 1
+        i = i - 1
+        nnz_indices = findall(!iszero, c.coefs[:, i])
+    end
+    return nnz_indices
 end
 
 """
@@ -79,8 +89,13 @@ model.fit(X,y, sample_weight=weights)
 return model
 """
 
-function train_ridge_regressor(X, y, weights, model)
-    #TODO
+function train_ridge_regressor(X, y, lam=1, sample_weights=I)
+	W = I
+    if sample_weights != I
+		W = Diagonal(sample_weights)
+	end
+    lam = Diagonal(fill(lam, size(X)[2]))
+    return inv(X'*W*X + lam)*X'*W*y
 end
 
 """Takes perturbed data, labels and distances, returns explanation.
@@ -96,12 +111,12 @@ end
 
 """
 
-function explain_instance_with_data(neighborhood_data,neighborhood_labels,distances,kernel_fn,label,num_features,model_regressor=nothing)
+function explain_instance_with_data(neighborhood_data,neighborhood_labels,distances,kernel_fn,label,num_features)
     #calculate weights using similiarity kernel function 
     weights = kernel_fn(distances)
 
     X = neighborhood_data
-
+    @info size(X)
     #selcted the label we want to calculate the explanation
     y = neighborhood_labels[:, label]
 
@@ -112,7 +127,7 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     selected_features = feature_selection(X_norm, y_norm, num_features)
 
     #train a linear model on simplified features
-    simplified_model = train_ridge_regressor(X[selected_features], y, weights, model_regressor)
+    simplified_model = train_ridge_regressor(X[:, selected_features], y,1, weights)
     
     #TODO: use weights of the simplified linear model for the explanation: 
     #       - high, positive weight -> positive attribution
@@ -121,3 +136,5 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     # replace return rand(size(neighborhood_data[1])...) with model weigths when it's working
     return rand(size(neighborhood_data)[2:end]...) 
 end
+
+export feature_selection

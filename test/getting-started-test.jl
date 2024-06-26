@@ -6,7 +6,7 @@ using CSV
 using DataFrames
 using RelevancePropagation
 
-df = CSV.read("../data/MNIST_input_9.csv", DataFrame)
+df = CSV.read("../data/MNIST_input_9.csv", DataFrame, types=Float32)
 x = Matrix(df)
 y = 9
 input = reshape(x, 28, 28, 1, :);

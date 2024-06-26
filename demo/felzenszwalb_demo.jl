@@ -5,7 +5,7 @@ using Statistics
 
 
 #load and display image
-image = load("horse.jpg")
+image = load("data/horse.jpg")
 
 display(image)
 

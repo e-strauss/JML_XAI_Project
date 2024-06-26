@@ -76,8 +76,10 @@ return model
 """
 
 function train_ridge_regressor(X, y, lam=1, sample_weights=I)
-	if sample_weights != I
+	if sample_weights isa Vector
 		W = Diagonal(sample_weights)
+	else
+		W = sample_weights
 	end
     return inv(X'*W*X + lam*I)*X'*W*y
 end

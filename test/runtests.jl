@@ -5,4 +5,6 @@ using Test
     #sanity check on the getting started tutorial
     include("getting-started-test.jl")
     include("lime_xai_test.jl")
+
+    include("test_train_ridge_regressor.jl")
 end

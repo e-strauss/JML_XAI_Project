@@ -9,9 +9,9 @@ using Test
     ]
 
     y = [2, 4, 8]
-    w = [9, 5, 7]
-    lambda = 3.5
+    w = [1, 3, 5]
+    lambda = 2
 
     @test train_ridge_regressor(X, y) ≈ [57//71 -28//71; -28//71 15//71]*[34, 68]
-    @test train_ridge_regressor(X,y, lamb=lambda, sample_weights=w) ≈ [-0.03425 0.02321; 0.02321 -0.01205]*[226, 452]
+    @test train_ridge_regressor(X,y; lamb=lambda, sample_weights=w) ≈ [117//292 -58//292; -58//292 30//292]*[146, 292]
 end

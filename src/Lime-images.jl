@@ -76,6 +76,36 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
     # more info in felzenszwalb_demo.jl
 
 
+
+    # get segmentation function
+    segmentation_fn = default_segmentation_function("felzenszwalb")
+
+    # get segmentation label map
+    seg_labels_map = segmentation_fn(image)
+
+    # Make a copy of the image
+    fudged_image = copy(image)
+
+    # do we need this?
+    if hide_color === nothing
+
+
+        for segment_label in unique(seg_labels_map)
+            mask = seg_labels_map .== segment_label
+        
+            mean_color = RGB(
+                mean([red(c) for c in image[mask]]),
+                mean([green(c) for c in image[mask]]),
+                mean([blue(c) for c in image[mask]])
+            )
+            
+            # Apply the mean color to all pixels in the current segment
+            fudged_image[mask] .= mean_color
+        end
+    end
+    # more info in felzenszwalb_demo.jl
+
+
     #TODO reference to python implementation ../python-reference/lime-image.py
 
     top = labels

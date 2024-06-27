@@ -37,7 +37,6 @@ Returns:
     An ImageExplanation object (see lime_image.py) with the corresponding
     explanations.
 """
-
 function explain_instance(self, image, classifier_fn, labels=(1,),
     hide_color=None,
     top_labels=5, num_features=100000, num_samples=1000,
@@ -218,4 +217,21 @@ function data_labels(image, fudged_image, segments, classifier_fn, num_samples, 
 
     print(typeof(data), typeof(labels))
     return data, labels
+end
+
+
+"""
+calculates the euclidian distance between each column vector in input matrix A and the column vectors in input matrix B
+
+Args:
+    A:  matrix (m,n)
+    B:  matrix (m,n) or (1,n)
+Returns:
+    distance: 1-d array of distances
+"""
+function pairwise_distance(A, B)
+    difference = A .- B
+    power_two = difference .^ 2
+    distances = sum(power_two, dims=2) .^ 0.5
+    return reshape(distances, :)
 end

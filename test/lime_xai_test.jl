@@ -6,7 +6,6 @@ using CSV
 using DataFrames
 
 df = CSV.read("../data/MNIST_input_9.csv", DataFrame, types=Float32)
-@info typeof(df)
 x = Matrix(df)
 y = 9
 

@@ -118,7 +118,7 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     weights = kernel_fn(distances)
 
     X = neighborhood_data
-    @info size(X)
+    #@info size(X)
     #selcted the label we want to calculate the explanation
     y = neighborhood_labels[:, label]
 
@@ -129,7 +129,7 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     selected_features = feature_selection(X_norm, y_norm, num_features)
 
     #train a linear model on simplified features
-    simplified_model = train_ridge_regressor(X[:, selected_features], y,1, weights)
+    simplified_model = train_ridge_regressor(X[:, selected_features], y,lam=1, sample_weights=weights)
     
     #TODO: use weights of the simplified linear model for the explanation: 
     #       - high, positive weight -> positive attribution

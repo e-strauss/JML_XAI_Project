@@ -229,9 +229,19 @@ Args:
 Returns:
     distance: 1-d array of distances
 """
-function pairwise_distance(A, B)
+function euclidian_distance(A,B)
     difference = A .- B
     power_two = difference .^ 2
-    distances = sum(power_two, dims=2) .^ 0.5
-    return reshape(distances, :)
+    return sum(power_two, dims=2) .^ 0.5
+end
+
+cosine_similiarity(A, B) = reshape(A*B',:)
+
+
+function pairwise_distance(A, B, method="cosine")
+    distance_metric = cosine_similiarity
+    if method == "euclidian"
+        distance_metric = euclidian_distance
+    end
+    reshape(distance_metric(A,B),:)
 end

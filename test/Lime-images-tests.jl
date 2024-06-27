@@ -33,6 +33,6 @@ end
     A = zeros(4, 2)
     x1 = [1;; 0]
     x2 = ones(1,2)
-    @test pairwise_distance(A, x1) == ones(4)
-    @test pairwise_distance(A, x2) == (ones(4).*2).^0.5
+    @test euclidian_distance(A, x1) == ones(4)
+    @test pairwise_distance(A, x2, "euclidian") == (ones(4).*2).^0.5
 end

@@ -80,7 +80,7 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
 
     top = labels
 
-    data, labels = data_labels(#=TODO=#)
+    data, labels = data_labels(image, fudged_image, seg_labels_map, classifier_fn, num_samples, batch_size)
     
 
 end 

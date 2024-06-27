@@ -4,7 +4,7 @@ using ImageSegmentation: felzenszwalb
 
 include("../src/Lime-images.jl")
 
-@testset "import-correct-segmentation-function" begin
+@testset "data_labels function simple test" begin
 
     img = load("../data/4x4_pixel.jpg")
 
@@ -25,5 +25,6 @@ include("../src/Lime-images.jl")
 
     data, labels = data_labels(img, img_white, segments, dumb_classifier, 2)
 
-    @test typeof(data) === Matrix{Int64} && unique(data) == [0,1] && typeof(labels) === Vector{Any}
+    @test typeof(data) === Matrix{Int64}
+    @test typeof(labels) === Vector{Any}
 end

@@ -8,5 +8,6 @@ using Test
     
     include("lime_feature_selection_test.jl")
     include("lime_xai_test.jl")
+    include("test_train_ridge_regressor.jl")
     include("Lime-images-tests.jl")
 end

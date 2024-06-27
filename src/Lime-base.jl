@@ -89,14 +89,16 @@ model.fit(X,y, sample_weight=weights)
 return model
 """
 
-function train_ridge_regressor(X, y, lam=1, sample_weights=I)
-	W = I
-    if sample_weights != I
+function train_ridge_regressor(X, y; lam=1, sample_weights=I)
+    if sample_weights isa Vector
 		W = Diagonal(sample_weights)
+	else
+		W = sample_weights
 	end
-    lam = Diagonal(fill(lam, size(X)[2]))
-    return inv(X'*W*X + lam)*X'*W*y
+    return inv(X'*W*X + lam*I)*X'*W*y
 end
+
+export train_ridge_regressor
 
 """Takes perturbed data, labels and distances, returns explanation.
 
@@ -116,7 +118,7 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     weights = kernel_fn(distances)
 
     X = neighborhood_data
-    @info size(X)
+    #@info size(X)
     #selcted the label we want to calculate the explanation
     y = neighborhood_labels[:, label]
 
@@ -127,7 +129,7 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     selected_features = feature_selection(X_norm, y_norm, num_features)
 
     #train a linear model on simplified features
-    simplified_model = train_ridge_regressor(X[:, selected_features], y,1, weights)
+    simplified_model = train_ridge_regressor(X[:, selected_features], y,lam=1, sample_weights=weights)
     
     #TODO: use weights of the simplified linear model for the explanation: 
     #       - high, positive weight -> positive attribution

@@ -1,6 +1,6 @@
 using Images, ImageView
 
-include("Lime-images.jl")
+include("src/Lime-images.jl")
 
 #print("cwd:", dirname(pwd()))
 

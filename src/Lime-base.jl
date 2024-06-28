@@ -113,7 +113,7 @@ export train_ridge_regressor
 
 """
 
-function explain_instance_with_data(neighborhood_data,neighborhood_labels,distances,kernel_fn,label,num_features)
+function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features, kernel_fn = (x) -> 1 .- x)
     #calculate weights using similiarity kernel function 
     weights = kernel_fn(distances)
 
@@ -121,7 +121,7 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     #@info size(X)
     #selcted the label we want to calculate the explanation
     y = neighborhood_labels[:, label]
-
+    @info size(y)
     #reference: python_reference/lime-base-reference.py:116
     X_norm, y_norm = weighted_data(X, y, weights)
 
@@ -131,12 +131,7 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     #train a linear model on simplified features
     simplified_model = train_ridge_regressor(X[:, selected_features], y,lam=1, sample_weights=weights)
     
-    #TODO: use weights of the simplified linear model for the explanation: 
-    #       - high, positive weight -> positive attribution
-    #       - high, negative weight -> negative attribution
-    #       - low, positive or negative OR features, that were not selected by feature selection -> low attribution
-    # replace return rand(size(neighborhood_data[1])...) with model weigths when it's working
-    return rand(size(neighborhood_data)[2:end]...) 
+    return simplified_model 
 end
 
 export feature_selection

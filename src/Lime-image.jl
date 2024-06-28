@@ -1,5 +1,5 @@
 using ImageSegmentation: felzenszwalb
-using Images
+using Images: labels_map,colorview,channelview, RGB, Gray, red, green, blue, N0f8
 
 """Generates explanations for a prediction.
 
@@ -37,15 +37,15 @@ Returns:
     An ImageExplanation object (see lime_image.py) with the corresponding
     explanations.
 """
-function explain_instance(self, image, classifier_fn, labels=(1,),
-    hide_color=None,
-    top_labels=5, num_features=100000, num_samples=1000,
-    batch_size=10,
-    segmentation_fn=None,
-    distance_metric="cosine",
-    model_regressor=None,
-    random_seed=None,)
-
+function explain_instance(image, classifier_fn, output_selection, num_features=100000, num_samples=1, batch_size=5, distance_metric="cosine",)
+    if size(image)[3] == 1
+        image = reshape(image, size(image)[1:2]...)
+    else
+        @info size(image)
+        image = permutedims(image, (3, 1, 2))
+        image = RGB.(colorview(RGB, image))
+    end
+    @info typeof(image)
     # get segmentation function
     segmentation_fn = default_segmentation_function("felzenszwalb")
 
@@ -53,66 +53,50 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
     seg_labels_map = segmentation_fn(image)
 
     # Make a copy of the image
-    fudged_image = copy(image)
+    fudged_image = create_fudged_image(image, seg_labels_map)
 
-    # do we need this?
-    if hide_color === nothing
-
-
-        for segment_label in unique(seg_labels_map)
-            mask = seg_labels_map .== segment_label
-        
-            mean_color = RGB(
-                mean([red(c) for c in image[mask]]),
-                mean([green(c) for c in image[mask]]),
-                mean([blue(c) for c in image[mask]])
-            )
-            
-            # Apply the mean color to all pixels in the current segment
-            fudged_image[mask] .= mean_color
-        end
-    end
     # more info in felzenszwalb_demo.jl
-
-
-
-    # get segmentation function
-    segmentation_fn = default_segmentation_function("felzenszwalb")
-
-    # get segmentation label map
-    seg_labels_map = segmentation_fn(image)
-
-    # Make a copy of the image
-    fudged_image = copy(image)
-
-    # do we need this?
-    if hide_color === nothing
-
-
-        for segment_label in unique(seg_labels_map)
-            mask = seg_labels_map .== segment_label
-        
-            mean_color = RGB(
-                mean([red(c) for c in image[mask]]),
-                mean([green(c) for c in image[mask]]),
-                mean([blue(c) for c in image[mask]])
-            )
-            
-            # Apply the mean color to all pixels in the current segment
-            fudged_image[mask] .= mean_color
-        end
-    end
-    # more info in felzenszwalb_demo.jl
-
-
-    #TODO reference to python implementation ../python-reference/lime-image.py
-
-    top = labels
 
     data, labels = data_labels(image, fudged_image, seg_labels_map, classifier_fn, num_samples, batch_size)
-    
+    data = Float32.(data)
+    labels = transpose(labels)
+    distances = pairwise_distance(data, data[1:1,:], distance_metric)
 
-end 
+    segments_relevance_weights = explain_instance_with_data(data, labels, distances, output_selection, num_features, exponential_kernel)
+
+    #TODO: build relevance weights for all pixel of the original image using segments_relevance_weights and segemnts
+    return image
+end
+
+function create_fudged_image(img::Matrix{RGB{Float32}}, seg_map)
+    fudged_image = copy(img)
+    for segment_label in unique(seg_map)
+        mask = (seg_map .== segment_label)
+    
+        mean_color = RGB(
+            mean([red(c) for c in img[mask]]),
+            mean([green(c) for c in img[mask]]),
+            mean([blue(c) for c in img[mask]])
+        )
+        
+        # Apply the mean color to all pixels in the current segment
+        fudged_image[mask] .= mean_color
+    end
+    display(fudged_image)
+    return fudged_image
+end
+
+function create_fudged_image(img::Matrix{Float32}, seg_map)
+    fudged_image = copy(img)
+    for segment_label in unique(seg_map)
+        mask = (seg_map .== segment_label)
+        mean_color = mean(img[mask])
+        
+        # Apply the mean color to all pixels in the current segment
+        fudged_image[mask] .= mean_color
+    end
+    return fudged_image
+end
 
 """
 return image segmantation function, if no function was passed
@@ -172,12 +156,12 @@ function data_labels(image, fudged_image, segments, classifier_fn, num_samples, 
     # binary matrix consisting of (row) vectors describing if feature is replaced or not
     data = reshape(rand(0:1, n_features*num_samples), num_samples, n_features)
     
-    labels = []
+    labels = nothing
 
     # make first row all 1s / all features enabled
     data[1 ,:] .= 1
 
-    imgs = []
+    imgs = nothing
 
     for  row in eachrow(data)
 
@@ -198,27 +182,47 @@ function data_labels(image, fudged_image, segments, classifier_fn, num_samples, 
 
         # replace marked parts in copy of original image
         tmp[mask] = fudged_image[mask]
+        @info typeof(tmp) === Matrix{RGB{Float32}}
+        if typeof(tmp) === Matrix{RGB{Float32}}
+            
+            tmp = permutedims(channelview(tmp),(2,3,1))
+            tmp = reshape(tmp,size(tmp)...,1)
+            @info typeof(tmp)
+        else
+            tmp = reshape(tmp,size(tmp)...,1,1)
+        end
 
-        push!(imgs, tmp)
+        
+        if imgs === nothing
+            imgs = tmp
+        else
+            imgs = cat(imgs,tmp,dims=4)
+        end
 
         # if batch size is reached: add predictions to labels and empty imgs
-        if length(imgs) == batch_size
+        if size(imgs)[4] == batch_size
             preds = classifier_fn(imgs)
-            push!(labels, preds)
-            imgs = Array[]
+            if labels === nothing
+                labels = preds
+            else
+                labels = cat(labels,preds,dims=2)
+            end
+            imgs = nothing
         end
     end
 
     # add predictions to labels and empty imgs if not alreadydone
-    if length(imgs) > 0
+    if (imgs !== nothing) && (size(imgs)[4] > 0)
         preds = classifier_fn(imgs)
-        push!(labels, preds)
+        if labels === nothing
+            labels = preds
+        else
+            labels = cat(labels,preds,dims=2)
+        end
     end
 
-    print(typeof(data), typeof(labels))
     return data, labels
 end
-
 
 """
 calculates the euclidian distance between each column vector in input matrix A and the column vectors in input matrix B
@@ -239,9 +243,6 @@ function cosine_similiarity(A, B)
     scalar_product = A*B'
     norm_A = sum(A.^2, dims=2).^0.5
     norm_B = sum(B.^2).^0.5
-    @info scalar_product
-    @info norm_A
-    @info norm_B
     return scalar_product ./ norm_A ./ norm_B
 end
 
@@ -254,3 +255,11 @@ function pairwise_distance(A, B, method="cosine")
     end
     reshape(distance_metric(A,B),:)
 end
+
+#if kernel is None:
+#    def kernel(d, kernel_width):
+#        return np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
+function exponential_kernel(d, kernel_width=0.25)
+    return (exp.(.-(d.^2)) ./ kernel_width^2).^0.5
+end
+

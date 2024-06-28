@@ -1,9 +1,11 @@
 using ExplainableAI
 using Flux
 using BSON
+using Metalhead: ResNet
 using JML_XAI_Project
 using CSV
 using DataFrames
+using Images
 
 df = CSV.read("../data/MNIST_input_9.csv", DataFrame, types=Float32)
 x = Matrix(df)
@@ -12,7 +14,14 @@ y = 9
 input = reshape(x, 28, 28, 1, :);
 input_rgb = repeat(input, 1, 1, 3, 1)
 
-model = BSON.load("../data/model.bson", @__MODULE__)[:model]
+img = load("../data/n01443537_goldfish.JPEG")
+img = permutedims(channelview(img),(2,3,1))
+img = reshape(img, size(img)..., 1)
+input = Float32.(img[1:32,1:32,:,1:1])
+@info size(input)
+#model = BSON.load("../data/model.bson", @__MODULE__)[:model]
+model = ResNet(18; pretrain = true);
+model = model.layers;
 analyzer = LIME(model)
 expl = analyze(input, analyzer);
 

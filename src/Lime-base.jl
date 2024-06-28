@@ -44,7 +44,7 @@ function weighted_data(X, y, weights)
     return X_norm, Y_norm
 end
 
-export(weighted_data)
+export weighted_data
 
 """
     feature_selection(X::Matrix, y::Vector, max_feat::Int) -> ReturnType

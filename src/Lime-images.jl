@@ -235,11 +235,20 @@ function euclidian_distance(A,B)
     return sum(power_two, dims=2) .^ 0.5
 end
 
-cosine_similiarity(A, B) = reshape(A*B',:)
+function cosine_similiarity(A, B) 
+    scalar_product = A*B'
+    norm_A = sum(A.^2, dims=2).^0.5
+    norm_B = sum(B.^2).^0.5
+    @info scalar_product
+    @info norm_A
+    @info norm_B
+    return scalar_product ./ norm_A ./ norm_B
+end
 
+cosine_distance(A,B) = 1.0 .- cosine_similiarity(A,B)
 
 function pairwise_distance(A, B, method="cosine")
-    distance_metric = cosine_similiarity
+    distance_metric = cosine_distance
     if method == "euclidian"
         distance_metric = euclidian_distance
     end

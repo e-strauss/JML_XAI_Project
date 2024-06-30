@@ -37,7 +37,7 @@ Returns:
     An ImageExplanation object (see lime_image.py) with the corresponding
     explanations.
 """
-function explain_instance(image, classifier_fn, output_selection, num_features=100000, num_samples=1, batch_size=5, distance_metric="cosine",)
+function explain_instance(image, classifier_fn, output_selection, num_features=8, num_samples=64, batch_size=5, distance_metric="cosine",)
     if size(image)[3] == 1
         image = reshape(image, size(image)[1:2]...)
     else
@@ -45,13 +45,12 @@ function explain_instance(image, classifier_fn, output_selection, num_features=1
         image = permutedims(image, (3, 1, 2))
         image = RGB.(colorview(RGB, image))
     end
-    @info typeof(image)
     # get segmentation function
     segmentation_fn = default_segmentation_function("felzenszwalb")
 
     # get segmentation label map
     seg_labels_map = segmentation_fn(image)
-
+    @info "nums segs:" length(unique(seg_labels_map))
     # Make a copy of the image
     fudged_image = create_fudged_image(image, seg_labels_map)
 
@@ -63,9 +62,15 @@ function explain_instance(image, classifier_fn, output_selection, num_features=1
     distances = pairwise_distance(data, data[1:1,:], distance_metric)
 
     segments_relevance_weights = explain_instance_with_data(data, labels, distances, output_selection, num_features, exponential_kernel)
-
+    max_i, max_j = size(seg_labels_map)[1:2]
+    pixel_relevance = zeros(max_i, max_j)
+    for i in 1:max_i
+        for j in 1:max_j
+            pixel_relevance[i,j] = segments_relevance_weights[seg_labels_map[i,j]]
+        end
+    end
     #TODO: build relevance weights for all pixel of the original image using segments_relevance_weights and segemnts
-    return image
+    return reshape(pixel_relevance, max_i, max_j,1,1)
 end
 
 function create_fudged_image(img::Matrix{RGB{Float32}}, seg_map)
@@ -82,7 +87,6 @@ function create_fudged_image(img::Matrix{RGB{Float32}}, seg_map)
         # Apply the mean color to all pixels in the current segment
         fudged_image[mask] .= mean_color
     end
-    display(fudged_image)
     return fudged_image
 end
 
@@ -131,7 +135,7 @@ function default_segmentation_function(algo_type::String)
 
     if algo_type== "felzenszwalb"
         function segmentation_func(img)
-            return labels_map(felzenszwalb(img, 10, 100))
+            return labels_map(felzenszwalb(img, 10, 10))
         end
 
     else
@@ -182,12 +186,10 @@ function data_labels(image, fudged_image, segments, classifier_fn, num_samples, 
 
         # replace marked parts in copy of original image
         tmp[mask] = fudged_image[mask]
-        @info typeof(tmp) === Matrix{RGB{Float32}}
         if typeof(tmp) === Matrix{RGB{Float32}}
             
-            tmp = permutedims(channelview(tmp),(2,3,1))
+            tmp = permutedims(channelview(tmp),(3,2,1))
             tmp = reshape(tmp,size(tmp)...,1)
-            @info typeof(tmp)
         else
             tmp = reshape(tmp,size(tmp)...,1,1)
         end

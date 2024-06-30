@@ -121,17 +121,17 @@ function explain_instance_with_data(neighborhood_data, neighborhood_labels, dist
     #@info size(X)
     #selcted the label we want to calculate the explanation
     y = neighborhood_labels[:, label]
-    @info size(y)
     #reference: python_reference/lime-base-reference.py:116
     X_norm, y_norm = weighted_data(X, y, weights)
 
     #select a subset of the features
     selected_features = feature_selection(X_norm, y_norm, num_features)
-
+    @info "number of selected features" length(selected_features)
     #train a linear model on simplified features
     simplified_model = train_ridge_regressor(X[:, selected_features], y,lam=1, sample_weights=weights)
-    
-    return simplified_model 
+    feature_relevance = zeros(size(neighborhood_data)[2])
+    feature_relevance[selected_features] .= simplified_model
+    return feature_relevance 
 end
 
 export feature_selection

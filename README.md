@@ -5,6 +5,10 @@
 [![Build Status](https://github.com/e-strauss/JML_XAI_Project.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/e-strauss/JML_XAI_Project.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/e-strauss/JML_XAI_Project.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/e-strauss/JML_XAI_Project.jl)
 
+# About JML_XAI_Project
+The JML_XAI_Project package implements the explainable AI methods SHAP and LIME for image inputs. The project was developed as part of the "Julia for Machine Learning" course at TU Berlin.
+
+[Here](https://e-strauss.github.io/JML_XAI_Project/dev/) you can find the documentation.
 
 # Running Unit Tests
 1. **clone the repo and open it in VSCode:**

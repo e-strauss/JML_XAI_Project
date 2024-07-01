@@ -1,5 +1,6 @@
 using XAIBase
 include("Lime-base.jl")
+include("SHAP-Kernel.jl")
 
 struct LIME{M} <: AbstractXAIMethod 
     model::M    

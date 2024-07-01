@@ -6,3 +6,5 @@ function agnostic_kernel(simpleFeatures)
 
     return (M - 1)/(binomial(M, zAbsolute)*zAbsolute*(M - zAbsolute))
 end
+
+export(agnostic_kernel)

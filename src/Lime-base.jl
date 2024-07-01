@@ -70,7 +70,6 @@ for i in range(len(coefs.T) - 1, 0, -1):
 
 function feature_selection(X, y, max_feat)
     c = lars(X, y; method=:lasso, intercept=false, standardize=true, lambda2=0.0,use_gram=false, maxiter=500, lambda_min=0.0, verbose=false)
-    #display(c.coefs)
     i = size(c.coefs)[2]
     nnz_indices = findall(!iszero, c.coefs[:, i])
     while length(nnz_indices) > max_feat && i > 1
@@ -126,7 +125,8 @@ function explain_instance_with_data(neighborhood_data, neighborhood_labels, dist
 
     #select a subset of the features
     selected_features = feature_selection(X_norm, y_norm, num_features)
-    @info "number of selected features" length(selected_features)
+    @info "number of segments:" size(neighborhood_data)[2]
+    @info "number of selected features:" length(selected_features)
     #train a linear model on simplified features
     simplified_model = train_ridge_regressor(X[:, selected_features], y,lam=1, sample_weights=weights)
     feature_relevance = zeros(size(neighborhood_data)[2])

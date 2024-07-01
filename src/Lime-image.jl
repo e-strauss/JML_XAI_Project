@@ -37,7 +37,7 @@ Returns:
     An ImageExplanation object (see lime_image.py) with the corresponding
     explanations.
 """
-function explain_instance(image, classifier_fn, output_selection, num_features=8, num_samples=64, batch_size=5, distance_metric="cosine",)
+function explain_instance(image, classifier_fn, output_selection, num_features=16, num_samples=64, batch_size=5, distance_metric="cosine",)
     if size(image)[3] == 1
         image = reshape(image, size(image)[1:2]...)
     else
@@ -50,7 +50,6 @@ function explain_instance(image, classifier_fn, output_selection, num_features=8
 
     # get segmentation label map
     seg_labels_map = segmentation_fn(image)
-    @info "nums segs:" length(unique(seg_labels_map))
     # Make a copy of the image
     fudged_image = create_fudged_image(image, seg_labels_map)
 
@@ -69,7 +68,6 @@ function explain_instance(image, classifier_fn, output_selection, num_features=8
             pixel_relevance[i,j] = segments_relevance_weights[seg_labels_map[i,j]]
         end
     end
-    #TODO: build relevance weights for all pixel of the original image using segments_relevance_weights and segemnts
     return reshape(pixel_relevance, max_i, max_j,1,1)
 end
 
@@ -135,7 +133,7 @@ function default_segmentation_function(algo_type::String)
 
     if algo_type== "felzenszwalb"
         function segmentation_func(img)
-            return labels_map(felzenszwalb(img, 10, 10))
+            return labels_map(felzenszwalb(img, 3, 10))
         end
 
     else

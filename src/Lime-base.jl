@@ -25,7 +25,6 @@ We sample instances both in the vicinity of x0 and far away from x (measured by 
 - `neighborhood_labels`: corresponding perturbed calculated by the model and mapping function H
 - `distances`: distances of each sampled point to original data point calculated using the distance metric D and mapping function H
 """
-
 function sample_data(x_0, model)
     #TODO
 end
@@ -37,7 +36,6 @@ Returns the weight normalization of X (data) and y (label) using the weight vect
 X_norm = ((X - np.average(X, axis=0, weights=weights)) * np.sqrt(weights[:, np.newaxis]))
 Y_norm = ((y - np.average(y, weights=weights)) * np.sqrt(weights))
 """
-
 function weighted_data(X, y, weights)
     X_norm =(X.-(sum(X .* weights, dims=1)./ sum(weights))) .* sqrt.(weights)
     Y_norm = (y .-(sum(y.*weights)./sum(weights))) .* sqrt.(weights)
@@ -67,7 +65,6 @@ for i in range(len(coefs.T) - 1, 0, -1):
 # Returns
 - indices of selected features
 """
-
 function feature_selection(X, y, max_feat)
     c = lars(X, y; method=:lasso, intercept=false, standardize=true, lambda2=0.0,use_gram=false, maxiter=500, lambda_min=0.0, verbose=false)
     #display(c.coefs)
@@ -88,7 +85,6 @@ model = Ridge(alpha=1, fit_intercept=True, random_state=self.random_state)
 model.fit(X,y, sample_weight=weights)
 return model
 """
-
 function train_ridge_regressor(X, y; lam=1, sample_weights=I)
     if sample_weights isa Vector
 		W = Diagonal(sample_weights)
@@ -112,7 +108,6 @@ export train_ridge_regressor
 - `model_regressor`: sklearn regressor to use in explanation. Defaults to Ridge regression if None. Must have model_regressor.coef_ and 'sample_weight' as a parameter to model_regressor.fit()
 
 """
-
 function explain_instance_with_data(neighborhood_data,neighborhood_labels,distances,kernel_fn,label,num_features)
     #calculate weights using similiarity kernel function 
     weights = kernel_fn(distances)

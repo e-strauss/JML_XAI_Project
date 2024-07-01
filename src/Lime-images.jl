@@ -37,7 +37,6 @@ Returns:
     An ImageExplanation object (see lime_image.py) with the corresponding
     explanations.
 """
-
 function explain_instance(self, image, classifier_fn, labels=(1,),
     hide_color=None,
     top_labels=5, num_features=100000, num_samples=1000,

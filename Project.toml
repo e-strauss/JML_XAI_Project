@@ -4,14 +4,12 @@ authors = ["Elias Strauss lathancer@gmx.de"]
 version = "1.0.0-DEV"
 
 [deps]
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 ImageSegmentation = "80713f31-8817-5129-9cf8-209ff8fb23e1"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 LARS = "ca81f029-5295-44ee-bb8b-6d7efe382a93"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-ShapML = "8523bd24-6f66-414b-9e1e-b02db3916d64"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 XAIBase = "9b48221d-a747-4c1b-9860-46a1d8ba24a7"
 

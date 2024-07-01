@@ -13,6 +13,7 @@ using VisionHeatmaps
 
 
 img = load("data/n01443537_goldfish.JPEG")
+display(img)
 img = permutedims(channelview(img),(3,2,1))
 img = reshape(img, size(img)..., 1)
 input = Float32.(img)

@@ -37,14 +37,15 @@ Returns:
     An ImageExplanation object (see lime_image.py) with the corresponding
     explanations.
 """
-function explain_instance(image, classifier_fn, output_selection, num_features=16, num_samples=64, batch_size=5, distance_metric="cosine",)
-    if size(image)[3] == 1
-        image = reshape(image, size(image)[1:2]...)
-    else
-        @info size(image)
-        image = permutedims(image, (3, 1, 2))
-        image = RGB.(colorview(RGB, image))
-    end
+function explain_instance(self, image, classifier_fn, labels=(1,),
+    hide_color=None,
+    top_labels=5, num_features=100000, num_samples=1000,
+    batch_size=10,
+    segmentation_fn=None,
+    distance_metric="cosine",
+    model_regressor=None,
+    random_seed=None,)
+
     # get segmentation function
     segmentation_fn = default_segmentation_function("felzenszwalb")
 

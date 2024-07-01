@@ -17,7 +17,8 @@ makedocs(;
         "Getting Started" => [
             "Lime" => "lime.md",
             "SHAP"     => "shap.md"
-        ]
+        ],
+        "Important Functions" => "api.md"
     ],
 )
 

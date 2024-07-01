@@ -1,4 +1,5 @@
 using ImageSegmentation: felzenszwalb
+using Images
 
 """Generates explanations for a prediction.
 
@@ -75,7 +76,43 @@ function explain_instance(self, image, classifier_fn, labels=(1,),
     # more info in felzenszwalb_demo.jl
 
 
+
+    # get segmentation function
+    segmentation_fn = default_segmentation_function("felzenszwalb")
+
+    # get segmentation label map
+    seg_labels_map = segmentation_fn(image)
+
+    # Make a copy of the image
+    fudged_image = copy(image)
+
+    # do we need this?
+    if hide_color === nothing
+
+
+        for segment_label in unique(seg_labels_map)
+            mask = seg_labels_map .== segment_label
+        
+            mean_color = RGB(
+                mean([red(c) for c in image[mask]]),
+                mean([green(c) for c in image[mask]]),
+                mean([blue(c) for c in image[mask]])
+            )
+            
+            # Apply the mean color to all pixels in the current segment
+            fudged_image[mask] .= mean_color
+        end
+    end
+    # more info in felzenszwalb_demo.jl
+
+
     #TODO reference to python implementation ../python-reference/lime-image.py
+
+    top = labels
+
+    data, labels = data_labels(image, fudged_image, seg_labels_map, classifier_fn, num_samples, batch_size)
+    
+
 end 
 
 """
@@ -118,4 +155,67 @@ function default_segmentation_function(algo_type::String)
         error("Not a valid segmentation function!")
     end
     return segmentation_func
+end
+
+
+"""
+Generates perturbed versions of a given image by turning superpixels on or off,using a specified 
+segmentation map. It then predicts the class probabilities for these perturbed images using a provided 
+classifier function. The function returns a tuple containing the binary matrix of perturbed images (data) 
+and their corresponding prediction probabilities (labels). This is useful for techniques like LIME to 
+understand and explain model predictions locally.
+"""
+function data_labels(image, fudged_image, segments, classifier_fn, num_samples, batch_size=10)
+
+    #number of features/segments in segmented image
+    n_features = length(unique(segments))
+
+    # binary matrix consisting of (row) vectors describing if feature is replaced or not
+    data = reshape(rand(0:1, n_features*num_samples), num_samples, n_features)
+    
+    labels = []
+
+    # make first row all 1s / all features enabled
+    data[1 ,:] .= 1
+
+    imgs = []
+
+    for  row in eachrow(data)
+
+        tmp =  copy(image)
+
+        #find all indexes where a 0 occours (this indexes will later correspond to specific features)
+        zeros_indexes = findall(x -> x == 0, row)
+
+        # n_features x num_samples BitMatrix of type all 0 (false)
+        mask = falses(size(segments)...)
+
+        # go over all segments that are supposed to be replaced and add them all together
+        # (pixels of same segments should have same value in the segments map, ranging from 1 to total_number_of_segments)
+        # represent each pixel to be replaced by a 1
+        for zero_index in zeros_indexes
+            mask .= mask .| (segments .== zero_index)
+        end
+
+        # replace marked parts in copy of original image
+        tmp[mask] = fudged_image[mask]
+
+        push!(imgs, tmp)
+
+        # if batch size is reached: add predictions to labels and empty imgs
+        if length(imgs) == batch_size
+            preds = classifier_fn(imgs)
+            push!(labels, preds)
+            imgs = Array[]
+        end
+    end
+
+    # add predictions to labels and empty imgs if not alreadydone
+    if length(imgs) > 0
+        preds = classifier_fn(imgs)
+        push!(labels, preds)
+    end
+
+    print(typeof(data), typeof(labels))
+    return data, labels
 end

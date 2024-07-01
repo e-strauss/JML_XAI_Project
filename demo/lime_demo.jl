@@ -1,15 +1,8 @@
 using ExplainableAI
-using Flux
 using Metalhead: ResNet
-#using JML_XAI_Project
-include("../src/Lime.jl")
-using CSV
-using DataFrames
+using JML_XAI_Project
 using Images
 using VisionHeatmaps
-
-#usage: include("src/xai-getting-started.jl")
-
 
 
 #img = load("data/n01689811_alligator_lizard.JPEG")

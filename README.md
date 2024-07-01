@@ -35,7 +35,6 @@ pkg> add https://github.com/e-strauss/JML_XAI_Project
 ## Usage
 ```
 using ExplainableAI
-using Flux
 using Metalhead: ResNet
 using JML_XAI_PROJECT
 using Images

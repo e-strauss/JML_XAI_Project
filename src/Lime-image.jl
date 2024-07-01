@@ -1,6 +1,6 @@
 using ImageSegmentation: felzenszwalb
 using Images: labels_map,colorview,channelview, RGB, Gray, red, green, blue, N0f8
-
+using Statistics: mean
 """Generates explanations for a prediction.
 
 First, we generate neighborhood data by randomly perturbing features

@@ -13,9 +13,9 @@ using VisionHeatmaps
 
 
 img = load("data/n01443537_goldfish.JPEG")
-img = permutedims(channelview(img),(2,3,1))
+img = permutedims(channelview(img),(3,2,1))
 img = reshape(img, size(img)..., 1)
-input = Float32.(img[1:32,1:32,:,1:1])
+input = Float32.(img)
 @info size(input)
 
 model = ResNet(18; pretrain = true);

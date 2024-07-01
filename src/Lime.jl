@@ -1,5 +1,6 @@
 using XAIBase
 include("Lime-base.jl")
+include("Lime-image.jl")
 
 struct LIME{M} <: AbstractXAIMethod 
     model::M    
@@ -11,20 +12,12 @@ function (method::LIME)(input, output_selector::AbstractOutputSelector)
     output = method.model(input)
     output_selection = output_selector(output)
 
-    input = vec(input)
+    #select first input
+    input = input[:,:,:,1]
 
-    samples = reshape(input, 1, size(input)...)
-    labels = transpose(output)
-    kernel_fn = (x) -> 1 .- x
-    max_features = length(input) / 6
-    distances = [0]
-    #TODO:  replace "dummy" values with meaniningful values
-    #       - create actual samples around the point input, compute labels and distances 
-    #       - specify a kernel function that transforms an array of distances into an array of proximity values
-    #       - specify a maximum num feature of features for the simpliefied model
-    val = explain_instance_with_data(samples, labels, distances, kernel_fn, output_selection[1], max_features)
+    val = explain_instance(input, method.model, output_selection[1])
     extras = nothing
-    return Explanation(val, output, output_selection, :MyMethod, :attribution, extras)
+    return Explanation(val, output, output_selection[1], :MyMethod, :attribution, extras)
 end
 
 export LIME

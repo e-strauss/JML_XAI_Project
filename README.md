@@ -33,7 +33,7 @@ pkg> add https://github.com/e-strauss/JML_XAI_Project
 
 
 ## Usage
-```
+```julia
 using ExplainableAI
 using Metalhead: ResNet
 using JML_XAI_PROJECT

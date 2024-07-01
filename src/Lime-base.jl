@@ -44,7 +44,7 @@ function weighted_data(X, y, weights)
     return X_norm, Y_norm
 end
 
-export(weighted_data)
+export weighted_data
 
 """
     feature_selection(X::Matrix, y::Vector, max_feat::Int) -> ReturnType
@@ -70,7 +70,6 @@ for i in range(len(coefs.T) - 1, 0, -1):
 
 function feature_selection(X, y, max_feat)
     c = lars(X, y; method=:lasso, intercept=false, standardize=true, lambda2=0.0,use_gram=false, maxiter=500, lambda_min=0.0, verbose=false)
-    #display(c.coefs)
     i = size(c.coefs)[2]
     nnz_indices = findall(!iszero, c.coefs[:, i])
     while length(nnz_indices) > max_feat && i > 1
@@ -113,7 +112,7 @@ export train_ridge_regressor
 
 """
 
-function explain_instance_with_data(neighborhood_data,neighborhood_labels,distances,kernel_fn,label,num_features)
+function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features, kernel_fn = (x) -> 1 .- x)
     #calculate weights using similiarity kernel function 
     weights = kernel_fn(distances)
 
@@ -121,22 +120,18 @@ function explain_instance_with_data(neighborhood_data,neighborhood_labels,distan
     #@info size(X)
     #selcted the label we want to calculate the explanation
     y = neighborhood_labels[:, label]
-
     #reference: python_reference/lime-base-reference.py:116
     X_norm, y_norm = weighted_data(X, y, weights)
 
     #select a subset of the features
     selected_features = feature_selection(X_norm, y_norm, num_features)
-
+    @info "number of segments:" size(neighborhood_data)[2]
+    @info "number of selected features:" length(selected_features)
     #train a linear model on simplified features
     simplified_model = train_ridge_regressor(X[:, selected_features], y,lam=1, sample_weights=weights)
-    
-    #TODO: use weights of the simplified linear model for the explanation: 
-    #       - high, positive weight -> positive attribution
-    #       - high, negative weight -> negative attribution
-    #       - low, positive or negative OR features, that were not selected by feature selection -> low attribution
-    # replace return rand(size(neighborhood_data[1])...) with model weigths when it's working
-    return rand(size(neighborhood_data)[2:end]...) 
+    feature_relevance = zeros(size(neighborhood_data)[2])
+    feature_relevance[selected_features] .= simplified_model
+    return feature_relevance 
 end
 
 export feature_selection

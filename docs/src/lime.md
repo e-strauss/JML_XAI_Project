@@ -6,12 +6,14 @@ For the example, we load an image from the [imagenet-sample-images](https://gith
 using ExplainableAI
 using Flux
 using Metalhead: ResNet
-include("jlFiles/Lime.jl")
+using JML_XAI_Project
 using CSV
 using DataFrames
 using Images
+using VisionHeatmaps
+using Random
 
-img = load("jlFiles/n01742172_boa_constrictor.JPEG")
+img = load("n01742172_boa_constrictor.JPEG")
 ```
 
 
@@ -27,6 +29,7 @@ The next step is to initialize a pre-trained ResNet model and apply LIME to it.
 ```@example implementations
 model = ResNet(18; pretrain = true);
 model = model.layers;
+Random.seed!(1234) # hide
 analyzer = LIME(model);
 expl = analyze(input, analyzer);
 ```

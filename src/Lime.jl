@@ -1,6 +1,3 @@
-using XAIBase
-include("Lime-base.jl")
-include("Lime-image.jl")
 
 """
     struct LIME{M} <: AbstractXAIMethod
@@ -28,4 +25,3 @@ function (method::LIME)(input, output_selector::AbstractOutputSelector)
     return Explanation(val, output, output_selection[1], :MyMethod, :attribution, extras)
 end
 
-export LIME

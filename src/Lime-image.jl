@@ -1,41 +1,36 @@
-using ImageSegmentation: felzenszwalb
-using Images: labels_map,colorview,channelview, RGB, Gray, red, green, blue, N0f8
-using Statistics: mean
-"""Generates explanations for a prediction.
 
-First, we generate neighborhood data by randomly perturbing features
-from the instance (see __data_inverse). We then learn locally weighted
-linear models on this neighborhood data to explain each of the classes
-in an interpretable way (see lime_base.py).
+"""
+    explain_instance(image, classifier_fn, output_selection, num_features=16, num_samples=64, batch_size=5, distance_metric="cosine",)
 
-Args:
-    image: 3 dimension RGB image. If this is only two dimensional,
-        we will assume it's a grayscale image and call gray2rgb.
-    classifier_fn: classifier prediction probability function, which
-        takes a numpy array and outputs prediction probabilities.  For
-        ScikitClassifiers , this is classifier.predict_proba.
-    labels: iterable with labels to be explained.
-    hide_color: If not None, will hide superpixels with this color.
-        Otherwise, use the mean pixel color of the image.
-    top_labels: if not None, ignore labels and produce explanations for
-        the K labels with highest prediction probabilities, where K is
-        this parameter.
-    num_features: maximum number of features present in explanation
-    num_samples: size of the neighborhood to learn the linear model
-    batch_size: batch size for model predictions
-    distance_metric: the distance metric to use for weights.
-    model_regressor: sklearn regressor to use in explanation. Defaults
-    to Ridge regression in LimeBase. Must have model_regressor.coef_
-    and 'sample_weight' as a parameter to model_regressor.fit()
-    segmentation_fn: SegmentationAlgorithm, wrapped skimage
-    segmentation function
-    random_seed: integer used as random seed for the segmentation
-        algorithm. If None, a random integer, between 0 and 1000,
-        will be generated using the internal random number generator.
+Generates explanations for a prediction.
+1. we generate neighborhood data by randomly perturbing features from the instance (see __data_inverse).
+2. We then learn locally weighted linear models on this neighborhood data to explain each of the classes in an interpretable way (see lime_base.py).
 
-Returns:
-    An ImageExplanation object (see lime_image.py) with the corresponding
-    explanations.
+# Parameters
+- `image`:  3 dimension RGB image. If this is only two dimensional, 
+            we will assume it's a grayscale image and call gray2rgb.
+            classifier_fn: classifier prediction probability function, which
+            takes a numpy array and outputs prediction probabilities.  For
+            ScikitClassifiers , this is classifier.predict_proba.
+- `labels`: iterable with labels to be explained.
+            hide_color: If not None, will hide superpixels with this color.
+            Otherwise, use the mean pixel color of the image.
+            top_labels: if not None, ignore labels and produce explanations for
+            the K labels with highest prediction probabilities, where K is this parameter.
+- `num_features`: maximum number of features present in explanation
+- `num_samples`: size of the neighborhood to learn the linear model
+- `batch_size`: batch size for model predictions
+- `distance_metric`: the distance metric to use for weights.
+- `model_regressor`: sklearn regressor to use in explanation. Defaults
+            to Ridge regression in LimeBase. Must have model_regressor.coef_
+            and 'sample_weight' as a parameter to model_regressor.fit()
+- `segmentation_fn`: SegmentationAlgorithm, wrapped skimage segmentation function
+- `random_seed`: integer used as random seed for the segmentation
+            algorithm. If None, a random integer, between 0 and 1000,
+            will be generated using the internal random number generator.
+
+# Returns:
+- An ImageExplanation object (see lime_image.py) with the corresponding explanations.
 """
 function explain_instance(image, classifier_fn, output_selection, num_features=16, num_samples=64, batch_size=5, distance_metric="cosine",)
     if size(image)[3] == 1
@@ -71,6 +66,19 @@ function explain_instance(image, classifier_fn, output_selection, num_features=1
     return reshape(pixel_relevance, max_i, max_j,1,1)
 end
 
+"""
+    create_fudged_image(img::Matrix{RGB{Float32}}, seg_map::Matrix{Int})
+
+Creates a "fudged" image where the pixels of each segment are replaced by the mean color of that segment.
+
+# Parameters
+- `img`: The input image as a matrix of RGB colors with floating point values.
+- `seg_map`: The segmentation map containing the segment labels for each pixel.
+
+# Returns
+- `Matrix{RGB{Float32}}`: A new image where the pixels of each segment are replaced by the mean color of that segment.
+
+"""
 function create_fudged_image(img::Matrix{RGB{Float32}}, seg_map)
     fudged_image = copy(img)
     for segment_label in unique(seg_map)
@@ -101,6 +109,8 @@ function create_fudged_image(img::Matrix{Float32}, seg_map)
 end
 
 """
+    function default_segmentation_function(algo_type::String)
+
 return image segmantation function, if no function was passed
 originally based on Scikit-Image implementation
 julia adaptations:
@@ -121,13 +131,12 @@ felzenszwalb
 
 comparision: https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_segmentations.html
 
-Args:
-    algo_type: string, segmentation algorithm among the following:
+# Parameters
+- `algo_type`: string, segmentation algorithm among the following:
         'quickshift', 'slic', 'felzenszwalb'
-    target_params: dict, algorithm parameters (valid model paramters
-        as define in Scikit-Image documentation)
+- `target_params`: dict, algorithm parameters (valid model paramters as define in Scikit-Image documentation)
 
-
+# Returns
 """
 function default_segmentation_function(algo_type::String)
 
@@ -144,11 +153,26 @@ end
 
 
 """
+    function data_labels(image, fudged_image, segments, classifier_fn, num_samples, batch_size=10)
+
 Generates perturbed versions of a given image by turning superpixels on or off,using a specified 
 segmentation map. It then predicts the class probabilities for these perturbed images using a provided 
 classifier function. The function returns a tuple containing the binary matrix of perturbed images (data) 
 and their corresponding prediction probabilities (labels). This is useful for techniques like LIME to 
 understand and explain model predictions locally.
+
+# Parameters
+- `image::Matrix{RGB{Float32}}`: The original input image.
+- `fudged_image::Matrix{RGB{Float32}}`: The fudged image with mean colors for segments.
+- `segments::Matrix{Int}`: The segmentation map where each segment is labeled with an integer.
+- `classifier_fn::Function`: A function that takes a batch of images and returns their predicted labels.
+- `num_samples::Int`:  The number of samples to generate.
+- `batch_size::Int=10`: The size of the batches to process through the classifier function. Defaults to 10.
+
+# Returns
+- `data::Matrix{Int}`: A binary matrix where each row indicates which features (segments) are active.
+- `labels::Matrix{Float64}`: A matrix of classifier predictions for the corresponding images in `data`.
+
 """
 function data_labels(image::Matrix{RGB{FT}},
     fudged_image::Matrix{RGB{FT}},
@@ -228,13 +252,16 @@ function data_labels(image::Matrix{RGB{FT}},
 end
 
 """
+    function euclidian_distance(A,B)
+
 calculates the euclidian distance between each column vector in input matrix A and the column vectors in input matrix B
 
-Args:
-    A:  matrix (m,n)
-    B:  matrix (m,n) or (1,n)
-Returns:
-    distance: 1-d array of distances
+# Parameters:
+- `A`:  matrix (m,n)
+- `B`:  matrix (m,n) or (1,n)
+
+# Returns:
+- `distance`: 1-d array of distances
 """
 function euclidian_distance(A,B)
     difference = A .- B
@@ -242,6 +269,18 @@ function euclidian_distance(A,B)
     return sum(power_two, dims=2) .^ 0.5
 end
 
+"""
+    cosine_similarity(A::AbstractArray, B::AbstractArray)
+
+Computes the cosine similarity between corresponding rows of two arrays.
+
+# Parameters
+- `A::AbstractArray`: The first input array. Each row represents a vector.
+- `B::AbstractArray`: The second input array. Each row represents a vector. Must have the same number of columns as `A`.
+
+# Returns
+- `AbstractArray`: An array of cosine similarities between corresponding rows of `A` and `B`.
+"""
 function cosine_similiarity(A, B) 
     scalar_product = A*B'
     norm_A = sum(A.^2, dims=2).^0.5
@@ -251,6 +290,19 @@ end
 
 cosine_distance(A,B) = 1.0 .- cosine_similiarity(A,B)
 
+"""
+    pairwise_distance(A::AbstractArray, B::AbstractArray; method="cosine")
+
+Computes the pairwise distance between corresponding rows of two arrays using the specified distance metric.
+
+# Parameters
+- `A::AbstractArray`: The first input array. Each row represents a vector.
+- `B::AbstractArray`: The second input array. Each row represents a vector. Must have the same number of columns as `A`.
+- `method::String="cosine"`: The distance metric to use. Options are `"cosine"` for cosine similarity or `"euclidean"` for Euclidean distance. Defaults to `"cosine"`.
+
+# Returns
+- `AbstractArray`: An array of distances between corresponding rows of `A` and `B`.
+"""
 function pairwise_distance(A, B, method="cosine")
     distance_metric = cosine_distance
     if method == "euclidian"
@@ -262,6 +314,18 @@ end
 #if kernel is None:
 #    def kernel(d, kernel_width):
 #        return np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
+"""
+    exponential_kernel(d::AbstractArray; kernel_width=0.25)
+
+Computes the exponential kernel for a given array of distances.
+
+# Parameters
+- `d::AbstractArray`: An array of distances.
+- `kernel_width::Float64=0.25`: The width of the kernel. Defaults to 0.25.
+
+# Returns
+- `AbstractArray`: An array of kernel values computed from the input distances.
+"""
 function exponential_kernel(d, kernel_width=0.25)
     return (exp.(.-(d.^2)) ./ kernel_width^2).^0.5
 end

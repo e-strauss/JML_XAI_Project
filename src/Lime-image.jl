@@ -150,17 +150,20 @@ classifier function. The function returns a tuple containing the binary matrix o
 and their corresponding prediction probabilities (labels). This is useful for techniques like LIME to 
 understand and explain model predictions locally.
 """
-function data_labels(image, fudged_image, segments, classifier_fn, num_samples, batch_size=10)
+function data_labels(image::Matrix{RGB{FT}},
+    fudged_image::Matrix{RGB{FT}},
+    segments::Matrix{IT},
+    classifier_fn,
+    num_samples::IT,
+    batch_size::IT=10) where {FT<:AbstractFloat, IT<:Integer}
 
-    #number of features/segments in segmented image
     n_features = length(unique(segments))
 
-    # binary matrix consisting of (row) vectors describing if feature is replaced or not
+    # binary matrix describing if feature/sector is replaced or not
     data = reshape(rand(0:1, n_features*num_samples), num_samples, n_features)
     
     labels = nothing
 
-    # make first row all 1s / all features enabled
     data[1 ,:] .= 1
 
     imgs = nothing
@@ -170,16 +173,16 @@ function data_labels(image, fudged_image, segments, classifier_fn, num_samples, 
         tmp =  copy(image)
 
         #find all indexes where a 0 occours (this indexes will later correspond to specific features)
-        zeros_indexes = findall(x -> x == 0, row)
+        indexes_where_zero = findall(x -> x == 0, row)
 
         # n_features x num_samples BitMatrix of type all 0 (false)
-        mask = falses(size(segments)...)
+        mask = falses(size(image)...)
 
         # go over all segments that are supposed to be replaced and add them all together
         # (pixels of same segments should have same value in the segments map, ranging from 1 to total_number_of_segments)
         # represent each pixel to be replaced by a 1
-        for zero_index in zeros_indexes
-            mask .= mask .| (segments .== zero_index)
+        for index in indexes_where_zero
+            mask .= mask .| (segments .== index)
         end
 
         # replace marked parts in copy of original image
@@ -211,7 +214,7 @@ function data_labels(image, fudged_image, segments, classifier_fn, num_samples, 
         end
     end
 
-    # add predictions to labels and empty imgs if not alreadydone
+    # add predictions to labels and empty imgs if not already done
     if (imgs !== nothing) && (size(imgs)[4] > 0)
         preds = classifier_fn(imgs)
         if labels === nothing

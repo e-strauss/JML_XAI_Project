@@ -28,7 +28,7 @@ include("../src/Lime-image.jl")
     img_white = RGB{Float32}.(colorview(RGB, img_white))
 
     dumb_classifier(input) = ["duck";;]
-    @info typeof(img), typeof(img_white)
+    
     data, labels = data_labels(img, img_white, segments, dumb_classifier, 2)
 
     @test typeof(data) === Matrix{Int64}

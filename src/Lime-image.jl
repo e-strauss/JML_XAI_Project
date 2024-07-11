@@ -1,36 +1,23 @@
 
+
 """
     explain_instance(image, classifier_fn, output_selection, num_features=16, num_samples=64, batch_size=5, distance_metric="cosine",)
 
 Generates explanations for a prediction.
-1. we generate neighborhood data by randomly perturbing features from the instance (see __data_inverse).
-2. We then learn locally weighted linear models on this neighborhood data to explain each of the classes in an interpretable way (see lime_base.py).
+1. we generate neighborhood data by randomly perturbing features from the instance.
+2. We then learn locally weighted linear models on this neighborhood data to explain each of the classes in an interpretable way.
 
 # Parameters
-- `image`:  3 dimension RGB image. If this is only two dimensional, 
-            we will assume it's a grayscale image and call gray2rgb.
-            classifier_fn: classifier prediction probability function, which
-            takes a numpy array and outputs prediction probabilities.  For
-            ScikitClassifiers , this is classifier.predict_proba.
-- `labels`: iterable with labels to be explained.
-            hide_color: If not None, will hide superpixels with this color.
-            Otherwise, use the mean pixel color of the image.
-            top_labels: if not None, ignore labels and produce explanations for
-            the K labels with highest prediction probabilities, where K is this parameter.
-- `num_features`: maximum number of features present in explanation
-- `num_samples`: size of the neighborhood to learn the linear model
-- `batch_size`: batch size for model predictions
-- `distance_metric`: the distance metric to use for weights.
-- `model_regressor`: sklearn regressor to use in explanation. Defaults
-            to Ridge regression in LimeBase. Must have model_regressor.coef_
-            and 'sample_weight' as a parameter to model_regressor.fit()
-- `segmentation_fn`: SegmentationAlgorithm, wrapped skimage segmentation function
-- `random_seed`: integer used as random seed for the segmentation
-            algorithm. If None, a random integer, between 0 and 1000,
-            will be generated using the internal random number generator.
+- `image`:  4 dimension RGB image. 
+- `classifier_fn`: classifier prediction probability function, which takes a image Matrix and outputs prediction probabilities.           
+- `labels`: iterable with labels to be explained.          
+- `num_features`: maximum number of features present in explanation, default = 16.
+- `num_samples`: size of the neighborhood (perturbed images) to learn the linear model, default = 64.
+- `batch_size`: batch size for model predictions, default = 5.
+- `distance_metric`: the distance metric to use for weights, default = 'cosine'
 
 # Returns:
-- An ImageExplanation object (see lime_image.py) with the corresponding explanations.
+- An ImageExplanation object with the corresponding explanations.
 """
 function explain_instance(image, classifier_fn, output_selection, num_features=16, num_samples=64, batch_size=5, distance_metric="cosine",)
     if size(image)[3] == 1
@@ -51,6 +38,9 @@ function explain_instance(image, classifier_fn, output_selection, num_features=1
     # more info in felzenszwalb_demo.jl
 
     data, labels = data_labels(image, fudged_image, seg_labels_map, classifier_fn, num_samples, batch_size)
+
+   
+    
     data = Float32.(data)
     labels = transpose(labels)
     distances = pairwise_distance(data, data[1:1,:], distance_metric)
@@ -65,6 +55,8 @@ function explain_instance(image, classifier_fn, output_selection, num_features=1
     end
     return reshape(pixel_relevance, max_i, max_j,1,1)
 end
+
+
 
 """
     create_fudged_image(img::Matrix{RGB{Float32}}, seg_map::Matrix{Int})

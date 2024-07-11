@@ -14,9 +14,13 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "Getting Started" => [
-            "Lime" => "lime.md",
-            "SHAP"     => "shap.md"
+        "Lime" => [
+            "About LIME" => "limeExp.md",
+            "Example"     => "lime.md"
+        ],
+        "SHAP" => [
+            "About SHAP" => "shap.md",
+            "Example"     => "shap.md"
         ],
         "Important Functions" => "api.md"
     ],

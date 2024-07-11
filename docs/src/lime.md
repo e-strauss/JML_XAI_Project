@@ -1,28 +1,35 @@
 # LIME
 
-For the example, we load an image from the [imagenet-sample-images](https://github.com/EliSchwartz/imagenet-sample-images/tree/master) repository.
+For the example, we load an image from the [imagenet-sample-images](https://github.com/EliSchwartz/imagenet-sample-images/tree/master) repository. An explanation will be generated for the image later on. 
 
 ```@example implementations
 using ExplainableAI
 using Flux
 using Metalhead: ResNet
-include("jlFiles/Lime.jl")
+using JML_XAI_Project
 using CSV
 using DataFrames
 using Images
+using VisionHeatmaps
 
-img = load("jlFiles/n01742172_boa_constrictor.JPEG")
+img = load("images/boa_constrictor.JPEG")
 ```
 
 
-The image is then pre-processed.
+## Image pre-processing
+The image is processed in order to use it as input for a model.
 
 ```@example implementations
-img = permutedims(channelview(img),(3,2,1))
+img = permutedims(channelview(img),(3,2,1));
 img = reshape(img, size(img)..., 1)
 input = Float32.(img)
 ```
+
+## Generation of the explanation 
 The next step is to initialize a pre-trained ResNet model and apply LIME to it.
+
+!!! info
+    Any classifier or regressor can be used at this point.
 
 ```@example implementations
 model = ResNet(18; pretrain = true);
@@ -30,7 +37,9 @@ model = model.layers;
 analyzer = LIME(model);
 expl = analyze(input, analyzer);
 ```
-The generated explanation can now be displayed as a heat map
+
+## Visualize explanaition
+The generated explanation can now be displayed as a heat map.
 
 ```@example implementations
 using VisionHeatmaps

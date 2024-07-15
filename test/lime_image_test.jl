@@ -28,19 +28,19 @@
 end
 
 @testset "pairwise_distance-function" begin
-    A = zeros(4, 2)
-    B = [1:4 zeros(4)]
-    C = reshape([0:49;;], 5,10)'
-    x1 = [1;; 0]
-    x2 = ones(1,2)
+    A = zeros(Float32, 4, 2)
+    B = Float32.([1:4 zeros(4)])
+    C = Float32.(reshape([0:49;;], 5,10)')
+    x1 = Float32.([1.0;; 0.0])
+    x2 = ones(Float32,1,2)
 
     #computed by scikitlearn
     df = CSV.read("../data/cosine_distance.csv", DataFrame, types=Float32)
     cos_dist = Matrix(df)
 
-    @test pairwise_distance(A, x1, "euclidian") == ones(4)
-    @test pairwise_distance(A, x2, "euclidian") == (ones(4).*2).^0.5
-    @test cosine_similiarity(B, x1) == [ones(4);;]
-    @test pairwise_distance(B, x1) == zeros(4)
-    @test pairwise_distance(C, ones(1,5)) ≈ reshape(cos_dist, :)
+    @test pairwise_distance(A, x1, "euclidian") == ones(Float32,4)
+    @test pairwise_distance(A, x2, "euclidian") == (ones(Float32,4).*2).^0.5
+    @test cosine_similiarity(B, x1) == [ones(Float32, 4);;]
+    @test pairwise_distance(B, x1) == zeros(Float32,4)
+    @test pairwise_distance(C, ones(Float32,1,5)) ≈ reshape(cos_dist, :)
 end

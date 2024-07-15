@@ -10,7 +10,7 @@ img = permutedims(channelview(img),(3,2,1))
 img = reshape(img, size(img)..., 1)
 #input = Float32.(img[1:32,1:32,:,1:1])
 input = Float32.(img)
-@info size(input)
+# @info size(input)
 #model = BSON.load("../data/model.bson", @__MODULE__)[:model]
 model = ResNet(18; pretrain = true);
 model = model.layers;

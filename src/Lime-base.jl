@@ -84,9 +84,15 @@ Takes perturbed data, labels and distances, returns explanation.
 
 # Returns
 """
-function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features, kernel_fn = (x) -> 1 .- x)
-    #calculate weights using similiarity kernel function 
-    weights = kernel_fn(distances)
+
+function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features; kernel_fn = (x) -> 1 .- x, lasso=true)
+    #calculate weights using similiarity kernel function
+
+    if kernel_fn == exponential_kernel
+        weights = kernel_fn(distances)
+    else
+        weights = distances
+    end
 
     X = neighborhood_data
     #@info size(X)
@@ -95,8 +101,13 @@ function explain_instance_with_data(neighborhood_data, neighborhood_labels, dist
     #reference: python_reference/lime-base-reference.py:116
     X_norm, y_norm = weighted_data(X, y, weights)
 
-    #select a subset of the features
-    selected_features = feature_selection(X_norm, y_norm, num_features)
+    #select a subset of the features if 
+    if lasso
+        selected_features = feature_selection(X_norm, y_norm, num_features)
+    else
+        selected_features = collect(1:size(X_norm)[2])
+    end
+    
     @info "number of segments:" size(neighborhood_data)[2]
     @info "number of selected features:" length(selected_features)
     #train a linear model on simplified features

@@ -1,18 +1,18 @@
 """
-    agnostic_kernel(simpleFeatures::Matrix{Real})
+    agnostic_kernel(simpleFeatures::Matrix{<:Real})
 
 Calculates the weights used for building the ridge regression model (simplified model),
     when applying SHAP with a model-agnostic kernel.
     Implentation based on "A Unified Approach to Interpreting Model Predictions" (https://arxiv.org/abs/1705.07874)
 
 # Parameters
-- `simpleFeatures::Matrix{Real}`: The simplified features used for building the simlified model.
+- `simpleFeatures::Matrix{<:Real}`: The simplified features used for building the simlified model.
 
 # Returns
 - `Vector{Float64}`: A vector of weights with one weight for each simplified sample.
 
 """
-function agnostic_kernel(simpleFeatures:: Matrix{Real})
+function agnostic_kernel(simpleFeatures:: Matrix{<:Real})
     weights = zeros(1)
 
     for i in 1:size(simpleFeatures)[1]

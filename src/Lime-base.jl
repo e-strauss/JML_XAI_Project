@@ -17,8 +17,6 @@ function weighted_data(X, y, weights)
     return X_norm, Y_norm
 end
 
-export weighted_data
-
 """
     feature_selection(X::Matrix, y::Vector, max_feat::Int) -> ReturnType
 
@@ -66,8 +64,6 @@ function train_ridge_regressor(X, y; lam=1, sample_weights=I)
     return inv(X'*W*X + lam*I)*X'*W*y
 end
 
-export train_ridge_regressor
-
 """
     function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features, kernel_fn = (x) -> 1 .- x)
 
@@ -84,9 +80,14 @@ Takes perturbed data, labels and distances, returns explanation.
 
 # Returns
 """
-function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features, kernel_fn = (x) -> 1 .- x)
-    #calculate weights using similiarity kernel function 
-    weights = kernel_fn(distances)
+function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features; kernel_fn = (x) -> 1 .- x, lasso=true)
+    #calculate weights using similiarity kernel function
+
+    if kernel_fn == exponential_kernel
+        weights = kernel_fn(distances)
+    else
+        weights = distances
+    end
 
     X = neighborhood_data
     #@info size(X)
@@ -95,8 +96,13 @@ function explain_instance_with_data(neighborhood_data, neighborhood_labels, dist
     #reference: python_reference/lime-base-reference.py:116
     X_norm, y_norm = weighted_data(X, y, weights)
 
-    #select a subset of the features
-    selected_features = feature_selection(X_norm, y_norm, num_features)
+    #select a subset of the features if 
+    if lasso
+        selected_features = feature_selection(X_norm, y_norm, num_features)
+    else
+        selected_features = collect(1:size(X_norm)[2])
+    end
+    
     @info "number of segments:" size(neighborhood_data)[2]
     @info "number of selected features:" length(selected_features)
     #train a linear model on simplified features
@@ -105,5 +111,3 @@ function explain_instance_with_data(neighborhood_data, neighborhood_labels, dist
     feature_relevance[selected_features] .= simplified_model
     return feature_relevance 
 end
-
-export feature_selection

@@ -19,7 +19,7 @@ Generates explanations for a prediction.
 # Returns:
 - An ImageExplanation object with the corresponding explanations.
 """
-function explain_instance(image, classifier_fn, output_selection, num_features=16, num_samples=64, batch_size=5, distance_metric="cosine",)
+function explain_instance(image, classifier_fn, output_selection; num_features=16, num_samples=64, batch_size=5, distance_metric="cosine", kernel=exponential_kernel, lasso=true)
     if size(image)[3] == 1
         image = reshape(image, size(image)[1:2]...)
     else
@@ -43,9 +43,14 @@ function explain_instance(image, classifier_fn, output_selection, num_features=1
     
     data = Float32.(data)
     labels = transpose(labels)
-    distances = pairwise_distance(data, data[1:1,:], distance_metric)
 
-    segments_relevance_weights = explain_instance_with_data(data, labels, distances, output_selection, num_features, exponential_kernel)
+    if kernel == exponential_kernel
+        distances = pairwise_distance(data, data[1:1,:], distance_metric)
+    else
+        distances = kernel(data[2:end,:])
+    end
+
+    segments_relevance_weights = explain_instance_with_data(data, labels, distances, output_selection, num_features; kernel_fn=kernel, lasso=lasso)
     max_i, max_j = size(seg_labels_map)[1:2]
     pixel_relevance = zeros(max_i, max_j)
     for i in 1:max_i

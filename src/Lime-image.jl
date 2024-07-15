@@ -147,7 +147,7 @@ end
 
 
 """
-    function data_labels(image::Matrix{RGB{FT}}, fudged_image::Matrix{RGB{<:AbstractFloat}}, segments::Matrix{IT}, classifier_fn, num_samples<:Integer, batch_size<:AbstractFloat=10)
+    function data_labels(image::Matrix{RGB{<:AbstractFloat}}, fudged_image::Matrix{RGB{<:AbstractFloat}}, segments::Matrix{<:Integer}, classifier_fn::Function, num_samples<:Integer, batch_size<:Integer=10)
 
 Generates perturbed versions of a given image by turning superpixels on or off,using a specified 
 segmentation map. It then predicts the class probabilities for these perturbed images using a provided 

@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 """
     agnostic_kernel(simpleFeatures::Matrix{Float32})
 
@@ -30,5 +28,3 @@ function agnostic_kernel(simpleFeatures)
     println(typeof(weights))
     return weights
 end
-
-export(agnostic_kernel)

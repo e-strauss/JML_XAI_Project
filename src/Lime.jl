@@ -1,6 +1,3 @@
-include("SHAP-Kernel.jl")
-include("Lime-base.jl")
-include("Lime-image.jl")
 """
     struct LIME{M} <: AbstractXAIMethod
 

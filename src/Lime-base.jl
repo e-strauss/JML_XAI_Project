@@ -17,8 +17,6 @@ function weighted_data(X, y, weights)
     return X_norm, Y_norm
 end
 
-export weighted_data
-
 """
     feature_selection(X::Matrix, y::Vector, max_feat::Int) -> ReturnType
 
@@ -65,8 +63,6 @@ function train_ridge_regressor(X, y; lam=1, sample_weights=I)
 	end
     return inv(X'*W*X + lam*I)*X'*W*y
 end
-
-export train_ridge_regressor
 
 """
     function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features, kernel_fn = (x) -> 1 .- x)
@@ -116,5 +112,3 @@ function explain_instance_with_data(neighborhood_data, neighborhood_labels, dist
     feature_relevance[selected_features] .= simplified_model
     return feature_relevance 
 end
-
-export feature_selection

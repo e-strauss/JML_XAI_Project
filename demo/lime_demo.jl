@@ -6,7 +6,7 @@ using VisionHeatmaps
 
 #usage: include("src/xai-getting-started.jl")
 
-#Plots heatmap
+#Generate heatmap
     #If overlay => heatmap on image (image in black and white)
     #If blurring => heatmap blurred
     #gaussSTD = standard deviation of gauss kernel, gaussSTD higher => more blurring

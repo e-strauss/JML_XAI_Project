@@ -1,11 +1,3 @@
-using Test
-using Images
-using ImageSegmentation: felzenszwalb
-using CSV
-using DataFrames
-using JML_XAI_Project
-#include("../src/Lime-image.jl")
-
 @testset "data_labels function simple test" begin
 
     img = load("../data/4x4_pixel.jpg")

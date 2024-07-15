@@ -64,19 +64,19 @@ end
 
 
 """
-    create_fudged_image(img::Matrix{RGB{Float32}}, seg_map::Matrix{Int})
+    create_fudged_image(img::Matrix{RGB{Float32}}, seg_map::Matrix{<:Integer})
 
 Creates a "fudged" image where the pixels of each segment are replaced by the mean color of that segment.
 
 # Parameters
-- `img`: The input image as a matrix of RGB colors with floating point values.
-- `seg_map`: The segmentation map containing the segment labels for each pixel.
+- `img::Matrix{RGB{Float32}}`: The input image as a matrix of RGB colors with floating point values.
+- `seg_map::Matrix{<:Integer}`: The segmentation map containing the segment labels for each pixel.
 
 # Returns
 - `Matrix{RGB{Float32}}`: A new image where the pixels of each segment are replaced by the mean color of that segment.
 
 """
-function create_fudged_image(img::Matrix{RGB{Float32}}, seg_map)
+function create_fudged_image(img::Matrix{RGB{Float32}}, seg_map::Matrix{<:Integer})
     fudged_image = copy(img)
     for segment_label in unique(seg_map)
         mask = (seg_map .== segment_label)
@@ -93,7 +93,20 @@ function create_fudged_image(img::Matrix{RGB{Float32}}, seg_map)
     return fudged_image
 end
 
-function create_fudged_image(img::Matrix{Float32}, seg_map)
+"""
+    create_fudged_image(img::Matrix{Float32}, seg_map::Matrix{<:Integer})
+
+Creates a "fudged" image where the pixels of each segment are replaced by the mean color of that segment.
+
+# Parameters
+- `img::Matrix{Float32}`: The input image as a matrix of RGB colors with floating point values.
+- `seg_map::Matrix{<:Integer}`: The segmentation map containing the segment labels for each pixel.
+
+# Returns
+- `Matrix{RGB{Float32}}`: A new image where the pixels of each segment are replaced by the mean color of that segment.
+
+"""
+function create_fudged_image(img::Matrix{Float32}, seg_map::Matrix{<:Integer})
     fudged_image = copy(img)
     for segment_label in unique(seg_map)
         mask = (seg_map .== segment_label)
@@ -108,36 +121,20 @@ end
 """
     function default_segmentation_function(algo_type::String)
 
-return image segmantation function, if no function was passed
-originally based on Scikit-Image implementation
-julia adaptations:
+Return image segmantation function, if no function was passed originally. Based on Scikit-Image implementation.
 
-quickshift
-- package: ??? (docs: ???)
-- explaination: ???
-- python packages can be used in julia, it's therefore possible to use the scikit-image library if desired
-
-slic
-- code: https://github.com/Cuda-Chen/SLIC.jl/tree/master (docs: NOT EVEN AN INOFFICIAL PACKAGE)
-- code seems to work, but spelling mistakes in the original and takes forever
-- explaination: https://cuda-chen.github.io/image%20processing/2020/07/29/slic-in-julia.html
-
-felzenszwalb
-- package: ImageSegmentation (docs: https://juliaimages.org/v0.21/imagesegmentation/)
-- explaination: https://www.analyticsvidhya.com/blog/2021/05/image-segmentation-with-felzenszwalbs-algorithm/
-
-comparision: https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_segmentations.html
+felzenszwalb:
+- further explainations: https://www.analyticsvidhya.com/blog/2021/05/image-segmentation-with-felzenszwalbs-algorithm/
 
 # Parameters
 - `algo_type`: string, segmentation algorithm among the following:
-        'quickshift', 'slic', 'felzenszwalb'
-- `target_params`: dict, algorithm parameters (valid model paramters as define in Scikit-Image documentation)
-
+        "felzenszwalb"
 # Returns
+- segmentation_func::Function: A segmantation function.
 """
 function default_segmentation_function(algo_type::String)
 
-    if algo_type== "felzenszwalb"
+    if algo_type == "felzenszwalb"
         function segmentation_func(img)
             return labels_map(felzenszwalb(img, 3, 10))
         end
@@ -150,7 +147,7 @@ end
 
 
 """
-    function data_labels(image, fudged_image, segments, classifier_fn, num_samples, batch_size=10)
+    function data_labels(image::Matrix{RGB{<:AbstractFloat}}, fudged_image::Matrix{RGB{<:AbstractFloat}}, segments::Matrix{<:Integer}, classifier_fn::Function, num_samples<:Integer, batch_size<:Integer=10)
 
 Generates perturbed versions of a given image by turning superpixels on or off,using a specified 
 segmentation map. It then predicts the class probabilities for these perturbed images using a provided 

@@ -1,6 +1,3 @@
-using JML_XAI_Project
-using Test
-
 @testset "test_train_ridge_regressor" begin
     X = [
         1 2;

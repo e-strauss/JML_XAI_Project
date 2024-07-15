@@ -1,9 +1,3 @@
-using Test
-using Images
-using ImageSegmentation: felzenszwalb
-using CSV
-using DataFrames
-
 include("../src/Lime-image.jl")
 
 @testset "data_labels function simple test" begin

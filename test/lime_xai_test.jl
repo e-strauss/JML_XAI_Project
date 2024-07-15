@@ -1,13 +1,3 @@
-using ExplainableAI
-using Flux
-using BSON
-using Metalhead: ResNet
-using JML_XAI_Project
-using CSV
-using DataFrames
-using Images
-using VisionHeatmaps
-
 df = CSV.read("../data/MNIST_input_9.csv", DataFrame, types=Float32)
 x = Matrix(df)
 y = 9

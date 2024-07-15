@@ -1,6 +1,14 @@
 using JML_XAI_Project
 using Test
-
+using ExplainableAI
+using Flux
+using BSON
+using Metalhead: ResNet
+using CSV
+using DataFrames
+using Images
+using VisionHeatmaps
+using ImageSegmentation: felzenszwalb
 
 @testset "JML_XAI_Project.jl" begin
     #component tests:

@@ -1,7 +1,4 @@
-using JML_XAI_Project
-using Test
-
-@testset "train_ridge_regressor_test" begin
+@testset "test_train_ridge_regressor" begin
     X = [
         1 2;
         2 4;

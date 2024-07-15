@@ -1,9 +1,9 @@
 # About SHAP
-The implementation of SHAP (Shapley Additive Explanations) incorporates the idea of Shapley values, which have their origins in game theory. Shapley values indicate how much a player has contributed to the outcome of a group game. This idea has been adapted to explainable AI methods by evaluating how much each feature contributes to the model's prediction, such as in the recognition of an image.
+The implementation of SHAP (**SH**apley **A**dditive Ex**P**lanations) incorporates the idea of Shapley values, which have their origins in game theory. Shapley values indicate how much a player has contributed to the outcome of a group game. This idea has been adapted to explainable AI methods by evaluating how much each feature contributes to the model's prediction, such as in the recognition of an image.
 
-[The paper](https://arxiv.org/pdf/1705.07874), which introduces the idea of SHAP, presents different variations of SHAP. The JML_XAI_Packet implements the Kernel SHAP variant, as it can be easily integrated into the LIME code.
+[The paper](https://arxiv.org/pdf/1705.07874), which introduces the idea of SHAP, presents different variations of SHAP. The JML_XAI_Packet implements Kernel SHAP, which is a model-agnostic variant, as it can be easily integrated into the LIME code and is universally applicable in contrast to model-specific variants of SHAP.
 
-## How does the code implements SHAP for image input:
+## How does the code implement SHAP for image input:
 ##### 1 Create super pixels for the input image through segmentation
 ---
 The aim of LIME is to generate an interpretable explanation, the first step is to calculate the input image in super pixels. 
@@ -28,7 +28,7 @@ Using a mask (a binary vector), the super pixels can then be faded in and out, 1
 
 ##### 4 Calculate shapley weights with weighting kernel:
 ---
-Disturbed images in which very many or very few samples are masked in and out are given more weight than images in which approximately half of the samples are masked in and out.
+Disturbed images in which very many or very few segments are masked in or out are given high weights, while images in which approximately half of the samples are masked in and out are given a weight close to zero. This way images, in which the influence of a single segment can be preciseley assessed, are higher weighted than those, for which this is not possible.
 
 ![](images/shap.png)
 

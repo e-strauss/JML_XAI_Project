@@ -80,7 +80,6 @@ Takes perturbed data, labels and distances, returns explanation.
 
 # Returns
 """
-
 function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features; kernel_fn = (x) -> 1 .- x, lasso=true)
     #calculate weights using similiarity kernel function
 

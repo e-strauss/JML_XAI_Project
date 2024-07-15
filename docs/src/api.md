@@ -28,6 +28,10 @@ JML_XAI_Project.train_ridge_regressor
 JML_XAI_Project.feature_selection
 ```
 
+### Shap
+```@docs
+JML_XAI_Project.agnostic_kernel
+```
 
 
 # Index

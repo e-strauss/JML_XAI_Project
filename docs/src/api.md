@@ -1,13 +1,13 @@
 # Base Functions
 
-### XAIBase Wrapper for calling LIME
+### XAIBase.jl interface for calling LIME and SHAP
 ```@docs
 JML_XAI_Project.LIME
 JML_XAI_Project.LIME(::Any, ::JML_XAI_Project.AbstractOutputSelector)
 ```
 
 ### Generation of a new interpretable data set
-Conversion of the input image into mulitple disturbed interpretable representation
+Conversion of the input image into mulitple disturbed interpretable representations
 
 ```@docs
 JML_XAI_Project.explain_instance 

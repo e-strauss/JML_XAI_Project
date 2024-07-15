@@ -34,7 +34,7 @@ Using a mask (a binary vector), the super pixels can then be faded in and out, 1
 ##### 4 Calculate distance of features of super pixel image and disturbed images
 ---
 
-##### 5 Calculate Explanaition - calculate weights of each superpixel:
+##### 5 Calculate Explanation - calculate weights of each superpixel:
 ---
 
 - kernel function is applyed on the calculated distances used as weights
@@ -46,5 +46,6 @@ Using a mask (a binary vector), the super pixels can then be faded in and out, 1
 ##### 6 Give each segment in the image its calculated weight
 ---
 
+##### 7 Process the information with XAIBase.jl to display the explanation as a heat map
 
 

@@ -10,7 +10,13 @@ The JMLXAIproject package provides explanations for image inputs and visualizes 
 |:--------------------------------------------- |:------------------------------:|
 | ![](images/boa_constrictor.JPEG)                          | ![](images/heatMap.png)               |
 
-To use the package please add the following code to your environment
+
+
+### Getting started
+To familiarise yourself with the package, there are sample implementations of LIME & SHAP in the documentation. On the other hand, there is the subfolder "demo" in the JML_XAI_Project package folder, from which "lime_demo.jl" can be executed, which runs LIME or SHAP.
+
+!!! warning
+    To use the package please add the following code to your environment
 
 ```julia
 using Pkg

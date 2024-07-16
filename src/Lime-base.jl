@@ -7,11 +7,12 @@ Returns the weight normalization of features and labels using a weight vector.
 # Parameters
 - `X`: features
 - `y`: labels
--`weights`: weight vector
+- `weights`: weight vector
 
 # Returns
+- Normalization of features and labels using a weight vector.
 """
-function weighted_data(X, y, weights)
+function weighted_data(X::Matrix{FT}, y::Vector{FT}, weights::Vector{<:AbstractFloat}) where {FT<:AbstractFloat}
     X_norm =(X.-(sum(X .* weights, dims=1)./ sum(weights))) .* sqrt.(weights)
     Y_norm = (y .-(sum(y.*weights)./sum(weights))) .* sqrt.(weights)
     return X_norm, Y_norm

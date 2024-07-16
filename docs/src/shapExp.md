@@ -10,7 +10,7 @@ The aim of LIME is to generate an interpretable explanation, the first step is t
 
 | Original input        | Output                     |
 |:---------------------------|:------------------------------:|
-| ![](images/boa_constrictor.JPEG)  | ![](images/fudged_image1.jpg)  |
+| ![](images/dog.jpeg)  | ![](images/fudged_image.jpg)  |
 
 
 ##### 2 Create different disturbed versions of the super pixels input image

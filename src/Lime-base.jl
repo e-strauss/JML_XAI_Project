@@ -19,22 +19,23 @@ function weighted_data(X::Matrix{<:Real}, y::Vector{<:Real}, weights::Vector{<:R
 end
 
 """
-    feature_selection(X::Matrix, y::Vector, max_feat::Int) -> ReturnType
+    feature_selection(X::Matrix, y::Vector, max_feat::Int) -> Vector
 
 Selects features for the model using LARS with Lasso [https://tibshirani.su.domains/ftp/lars.pdf] s.t. len(selected_features) <= max_feat
-Use LARS package: https://github.com/simonster/LARS.jl
+Uses the LARS package: https://github.com/simonster/LARS.jl, which needs to be installed manually via:
+[package manager] add https://github.com/e-strauss/LARS.jl
 
 
 # Parameters
 - `X`: weighted features
 - `y`: weighted labels
+- `max_feat`: maximum number of feature that can be selected
 
 # Returns
 - indices of selected features
 """
-function feature_selection(X, y, max_feat)
-    
-    c = lars(X, y; method=:lasso, intercept=false, standardize=true, lambda2=0.0,use_gram=false, maxiter=500, lambda_min=0.0, verbose=false)
+function feature_selection(X::Matrix{FT}, y::Vector{FT}, max_feat::IT) where {FT<:AbstractFloat, IT<:Integer}
+    c = lars(X, y; method=:lasso, intercept=false, standardize=true, lambda2=0.0,use_gram=false, maxiter=100, lambda_min=0.0, verbose=false)
     i = size(c.coefs)[2]
     nnz_indices = findall(!iszero, c.coefs[:, i])
     while length(nnz_indices) > max_feat && i > 1
@@ -69,7 +70,9 @@ end
 """
     function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features, kernel_fn = (x) -> 1 .- x)
 
-Takes perturbed data, labels and distances, returns explanation.
+Takes perturbed data, labels and distances, returns explanation. Generates a relevance score for each feature based on the local approximition 
+using the neighborhood_data. A relevance score close to zero means that the feature is not relevant. A larger, positive value means that the feature
+contributes positively to the specific label, and negative value means that the feature decreases the chance for the classification of the specific label.
 
 # Parameters
 - `neighborhood_data`: perturbed data
@@ -81,14 +84,23 @@ Takes perturbed data, labels and distances, returns explanation.
 - `model_regressor`: sklearn regressor to use in explanation. Defaults to Ridge regression if None. Must have model_regressor.coef_ and 'sample_weight' as a parameter to model_regressor.fit()
 
 # Returns
+- Vector{AbstractFloat}: relevance score for each feature
 """
-function explain_instance_with_data(neighborhood_data, neighborhood_labels, distances, label, num_features; kernel_fn = (x) -> 1 .- x, lasso=true)
-    #calculate weights using similiarity kernel function
+function explain_instance_with_data(
+    neighborhood_data::Matrix{FT},
+    neighborhood_labels::Matrix{FT}, 
+    distances::Vector{FT}, 
+    label, 
+    num_features::IT, 
+    kernel_fn = (x) -> 1 .- x,
+    lasso=true) where {FT<:AbstractFloat, IT<:Integer}
 
-    if kernel_fn == exponential_kernel
-        weights = kernel_fn(distances)
-    else
+    #calculate weights using similiarity kernel function
+    if kernel_fn == agnostic_kernel
+        #agnostic kernel was already applied on the distances
         weights = distances
+    else
+        weights = kernel_fn(distances)
     end
 
     X = neighborhood_data
@@ -104,9 +116,7 @@ function explain_instance_with_data(neighborhood_data, neighborhood_labels, dist
     else
         selected_features = collect(1:size(X_norm)[2])
     end
-    
-    @info "number of segments:" size(neighborhood_data)[2]
-    @info "number of selected features:" length(selected_features)
+
     #train a linear model on simplified features
     simplified_model = train_ridge_regressor(X[:, selected_features], y,lam=1, sample_weights=weights)
     feature_relevance = zeros(size(neighborhood_data)[2])

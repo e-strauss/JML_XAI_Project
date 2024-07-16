@@ -12,7 +12,8 @@ Conversion of the input image into mulitple disturbed interpretable representati
 ```@docs
 JML_XAI_Project.explain_instance 
 JML_XAI_Project.default_segmentation_function
-JML_XAI_Project.cosine_similiarity 
+JML_XAI_Project.cosine_similiarity
+JML_XAI_Project.cosine_distance
 JML_XAI_Project.pairwise_distance 
 JML_XAI_Project.data_labels  
 JML_XAI_Project.euclidian_distance 

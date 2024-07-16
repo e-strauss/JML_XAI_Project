@@ -10,7 +10,7 @@ img = permutedims(channelview(img),(3,2,1))
 img = reshape(img, size(img)..., 1)
 #input = Float32.(img[1:32,1:32,:,1:1])
 input = Float32.(img)
-@info size(input)
+# @info size(input)
 #model = BSON.load("../data/model.bson", @__MODULE__)[:model]
 model = ResNet(18; pretrain = true);
 model = model.layers;
@@ -20,5 +20,14 @@ heat = heatmap(expl.val)
 
 save("../data/lime-goldfish-test.jpg", heat)
 @testset "LIME XAI TEST: same model output" begin
+    @test expl.output == model(input)
+end
+
+analyzer = LIME(model, agnostic_kernel, false)
+expl = analyze(input, analyzer);
+heat = heatmap(expl.val)
+save("../data/lime-shap-goldfish-test.jpg", heat)
+
+@testset "LIME SHAP XAI TEST: same model output" begin
     @test expl.output == model(input)
 end

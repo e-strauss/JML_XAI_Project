@@ -25,7 +25,5 @@ function agnostic_kernel(simpleFeatures:: Matrix{<:Real})
         push!(weights, weight)
     end
     
-    println("Typ von weights:")
-    println(typeof(weights))
     return weights
 end

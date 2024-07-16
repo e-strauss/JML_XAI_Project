@@ -13,17 +13,16 @@ Generates explanations for a prediction.
 - `labels`: iterable with labels to be explained.          
 - `num_features`: maximum number of features present in explanation, default = 16.
 - `num_samples`: size of the neighborhood (perturbed images) to learn the linear model, default = 64.
-- `batch_size`: batch size for model predictions, default = 5.
+- `batch_size`: batch size for model predictions, default = 8.
 - `distance_metric`: the distance metric to use for weights, default = 'cosine'
 
 # Returns:
 - An ImageExplanation object with the corresponding explanations.
 """
-function explain_instance(image, classifier_fn, output_selection; num_features=16, num_samples=64, batch_size=5, distance_metric="cosine", kernel=exponential_kernel, lasso=true)
+function explain_instance(image, classifier_fn, output_selection; num_features=16, num_samples=64, batch_size=8, distance_metric="cosine", kernel=exponential_kernel, lasso=true)
     if size(image)[3] == 1
         image = reshape(image, size(image)[1:2]...)
     else
-        @info size(image)
         image = permutedims(image, (3, 1, 2))
         image = RGB.(colorview(RGB, image))
     end
@@ -40,17 +39,17 @@ function explain_instance(image, classifier_fn, output_selection; num_features=1
     data, labels = data_labels(image, fudged_image, seg_labels_map, classifier_fn, num_samples, batch_size)
 
    
-    
+    #convert integer [0 or 1] to floats
     data = Float32.(data)
-    labels = transpose(labels)
+    labels = Float32.(transpose(labels))
 
     if kernel == exponential_kernel
         distances = pairwise_distance(data, data[1:1,:], distance_metric)
     else
-        distances = kernel(data[2:end,:])
+        distances = Float32.(kernel(data[2:end,:]))
     end
 
-    segments_relevance_weights = explain_instance_with_data(data, labels, distances, output_selection, num_features; kernel_fn=kernel, lasso=lasso)
+    segments_relevance_weights = explain_instance_with_data(data, labels, distances, output_selection, num_features, kernel, lasso)
     max_i, max_j = size(seg_labels_map)[1:2]
     pixel_relevance = zeros(max_i, max_j)
     for i in 1:max_i
@@ -257,10 +256,11 @@ calculates the euclidian distance between each column vector in input matrix A a
 # Returns:
 - `distance`: 1-d array of distances
 """
-function euclidian_distance(A,B)
+function euclidian_distance(A::Matrix{FT},B::Matrix{FT}) where FT <: AbstractFloat
     difference = A .- B
     power_two = difference .^ 2
-    return sum(power_two, dims=2) .^ 0.5
+    out = sum(power_two, dims=2) .^ Float32(0.5)
+    return out
 end
 
 """
@@ -275,14 +275,19 @@ Computes the cosine similarity between corresponding rows of two arrays.
 # Returns
 - `AbstractArray`: An array of cosine similarities between corresponding rows of `A` and `B`.
 """
-function cosine_similiarity(A, B) 
+function cosine_similiarity(A::Matrix{FT},B::Matrix{FT}) where FT <: AbstractFloat
     scalar_product = A*B'
-    norm_A = sum(A.^2, dims=2).^0.5
-    norm_B = sum(B.^2).^0.5
+    norm_A = sum(A.^2, dims=2).^Float32(0.5)
+    norm_B = sum(B.^2).^Float32(0.5)
     return scalar_product ./ norm_A ./ norm_B
 end
 
-cosine_distance(A,B) = 1.0 .- cosine_similiarity(A,B)
+"""
+    cosine_similarity(A::AbstractArray, B::AbstractArray)
+
+Computes the cosine distance: 1 - cosine_similarity(A,B)
+"""
+cosine_distance(A::Matrix{FT},B::Matrix{FT}) where FT <: AbstractFloat = Float32.(1.0) .- cosine_similiarity(A,B)
 
 """
     pairwise_distance(A::AbstractArray, B::AbstractArray; method="cosine")
@@ -297,7 +302,7 @@ Computes the pairwise distance between corresponding rows of two arrays using th
 # Returns
 - `AbstractArray`: An array of distances between corresponding rows of `A` and `B`.
 """
-function pairwise_distance(A, B, method="cosine")
+function pairwise_distance(A::Matrix{FT},B::Matrix{FT}, method::String="cosine") where FT <: AbstractFloat
     distance_metric = cosine_distance
     if method == "euclidian"
         distance_metric = euclidian_distance
@@ -305,22 +310,19 @@ function pairwise_distance(A, B, method="cosine")
     reshape(distance_metric(A,B),:)
 end
 
-#if kernel is None:
-#    def kernel(d, kernel_width):
-#        return np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
 """
-    exponential_kernel(d::AbstractArray; kernel_width=0.25)
+    exponential_kernel(d::Vector{AbstractFloat}; kernel_width=0.25)
 
 Computes the exponential kernel for a given array of distances.
 
 # Parameters
-- `d::AbstractArray`: An array of distances.
-- `kernel_width::Float64=0.25`: The width of the kernel. Defaults to 0.25.
+- `d::Vector{AbstractFloat}`: An array of distances.
+- `kernel_width::AbstractFloat=0.25`: The width of the kernel. Defaults to 0.25.
 
 # Returns
-- `AbstractArray`: An array of kernel values computed from the input distances.
+- `Vector{AbstractFloat}`: An array of kernel values computed from the input distances.
 """
-function exponential_kernel(d, kernel_width=0.25)
+function exponential_kernel(d::Vector{FT}, kernel_width::FT=Float32(0.25)) where {FT <: AbstractFloat}
     return (exp.(.-(d.^2)) ./ kernel_width^2).^0.5
 end
 

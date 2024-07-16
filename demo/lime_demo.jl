@@ -41,14 +41,20 @@ input = Float32.(imgVec)
 model = ResNet(18; pretrain = true);
 
 #Explanation Using LIME
-model = model.layers;analyzer = LIME(model)
+model = model.layers;
+analyzer = LIME(model)
 
 #Explanation Using SHAP with Model-Agnostic Kernel (lasso has to be set to false)
-#model = model.layers;analyzer = LIME(model, agnostic_kernel, false)
+#model = model.layers;
+
 
 expl = analyze(input, analyzer);
 print("Label: ", argmax(expl.output[:,1]) - 1)
 heat = generate_heatmap(expl, img=img, overlay=true, blurring=true)
+display(heat)
+
+analyzer = LIME(model, agnostic_kernel, false)
+expl = analyze(input, analyzer);
 display(heat)
 
 #Save Heatmap to File

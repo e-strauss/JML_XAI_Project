@@ -35,7 +35,7 @@ Uses the LARS package: https://github.com/simonster/LARS.jl, which needs to be i
 - indices of selected features
 """
 function feature_selection(X::Matrix{FT}, y::Vector{FT}, max_feat::IT) where {FT<:AbstractFloat, IT<:Integer}
-    c = lars(X, y; method=:lasso, intercept=false, standardize=true, lambda2=0.0,use_gram=false, maxiter=500, lambda_min=0.0, verbose=false)
+    c = lars(X, y; method=:lasso, intercept=false, standardize=true, lambda2=0.0,use_gram=false, maxiter=100, lambda_min=0.0, verbose=false)
     i = size(c.coefs)[2]
     nnz_indices = findall(!iszero, c.coefs[:, i])
     while length(nnz_indices) > max_feat && i > 1

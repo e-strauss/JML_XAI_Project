@@ -19,7 +19,7 @@ makedocs(;
             "Example"     => "lime.md"
         ],
         "SHAP" => [
-            "About SHAP" => "shap.md",
+            "About SHAP" => "shapExp.md",
             "Example"     => "shap.md"
         ],
         "Important Functions" => "api.md"

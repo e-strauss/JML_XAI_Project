@@ -9,7 +9,7 @@ using JML_XAI_Project
 using Images
 using VisionHeatmaps
 
-img = load("images/boa_constrictor.JPEG")
+img = load("images/dog.jpeg")
 ```
 
 

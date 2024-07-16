@@ -6,9 +6,9 @@ CurrentModule = JML_XAI_Project
 This package implements the explainable AI methods [LIME](https://arxiv.org/abs/1602.04938) and [SHAP](https://arxiv.org/pdf/1705.07874) using [XAIBase.jl](https://julia-xai.github.io/XAIDocs/XAIBase/stable/). LIME and SHAP are **model-agnostic** explainable AI methods, so they can be used to explain different kinds of models.
 The JMLXAIproject package provides explanations for image inputs and visualizes them as heatmaps.
 
-| **Input**                                  | **Output** |
-|:--------------------------------------------- |:------------------------------:|
-| ![](images/boa_constrictor.JPEG)                          | ![](images/heatMap.png)               |
+| **Input**                                  | **Output - Lime** |**Output - Shap** |
+|:--------------------------------------------- |:------------------------------:|:------------------------------:|
+| ![](images/dog.jpeg)                          | ![](images/heatMap.jpg)               | ![](images/heatMapShap.jpg)               |
 
 
 

@@ -10,12 +10,12 @@ The aim of LIME is to generate an interpretable explanation, the first step is t
 
 | Original input        | Output                     |
 |:---------------------------|:------------------------------:|
-| ![](images/boa_constrictor.JPEG)  | ![](images/fudged_image1.jpg)  |
+| ![](images/dog.jpeg)  | ![](images/fudged_image.jpg)  |
 
 
 ##### 2 Create different disturbed versions of the super pixels input image
 ---
-Using a mask (a binary vector), the super pixels can then be faded in and out, 1 means super pixel is shown, 0 means no colour value, thus generating an interpretable representation of the image.
+Using a mask (a binary vector), the super pixels can then be randomly switched on and off, 1 means super pixel is shown, 0 means no colour value, thus generating an interpretable representation of the image.
 
 
 |  super pixels input             | disturbed versions 1    | disturbed versions 2 | disturbed versions 3       |

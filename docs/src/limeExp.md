@@ -8,7 +8,7 @@ The JML package is based on the [LIME package] (https://github.com/marcotcr/lime
 
 
 
-## How does the code implements LIME for Image Input:
+## How does the code implement LIME for Image Input:
 ##### 1 Create super pixels for the input image through segmentation
 ---
 The aim of LIME is to generate an interpretable explanation, the first step is to calculate the input image in super pixels. 

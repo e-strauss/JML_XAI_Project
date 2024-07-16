@@ -92,10 +92,16 @@ function explain_instance_with_data(
     distances::Vector{FT}, 
     label, 
     num_features::IT, 
-    kernel_fn = (x) -> 1 .- x),
-    lasso=true where {FT<:AbstractFloat, IT<:Integer}
-    #calculate weights using similiarity kernel function 
-    weights = kernel_fn(distances)
+    kernel_fn = (x) -> 1 .- x,
+    lasso=true) where {FT<:AbstractFloat, IT<:Integer}
+
+    #calculate weights using similiarity kernel function
+    if kernel_fn == agnostic_kernel
+        #agnostic kernel was already applied on the distances
+        weights = distances
+    else
+        weights = kernel_fn(distances)
+    end
 
     X = neighborhood_data
     #@info size(X)
@@ -110,9 +116,7 @@ function explain_instance_with_data(
     else
         selected_features = collect(1:size(X_norm)[2])
     end
-    
-    @info "number of segments:" size(neighborhood_data)[2]
-    @info "number of selected features:" length(selected_features)
+
     #train a linear model on simplified features
     simplified_model = train_ridge_regressor(X[:, selected_features], y,lam=1, sample_weights=weights)
     feature_relevance = zeros(size(neighborhood_data)[2])

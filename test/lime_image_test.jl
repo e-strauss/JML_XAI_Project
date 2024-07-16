@@ -39,7 +39,7 @@ end
     cos_dist = Matrix(df)
 
     @test pairwise_distance(A, x1, "euclidian") == ones(Float32,4)
-    @test pairwise_distance(A, x2, "euclidian") == (ones(Float32,4).*2).^0.5
+    @test pairwise_distance(A, x2, "euclidian") == (ones(Float32,4).*2).^Float32(0.5)
     @test cosine_similiarity(B, x1) == [ones(Float32, 4);;]
     @test pairwise_distance(B, x1) == zeros(Float32,4)
     @test pairwise_distance(C, ones(Float32,1,5)) ≈ reshape(cos_dist, :)

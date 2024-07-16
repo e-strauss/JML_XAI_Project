@@ -13,13 +13,13 @@ Generates explanations for a prediction.
 - `labels`: iterable with labels to be explained.          
 - `num_features`: maximum number of features present in explanation, default = 16.
 - `num_samples`: size of the neighborhood (perturbed images) to learn the linear model, default = 64.
-- `batch_size`: batch size for model predictions, default = 5.
+- `batch_size`: batch size for model predictions, default = 8.
 - `distance_metric`: the distance metric to use for weights, default = 'cosine'
 
 # Returns:
 - An ImageExplanation object with the corresponding explanations.
 """
-function explain_instance(image, classifier_fn, output_selection; num_features=16, num_samples=64, batch_size=5, distance_metric="cosine", kernel=exponential_kernel, lasso=true)
+function explain_instance(image, classifier_fn, output_selection; num_features=16, num_samples=64, batch_size=8, distance_metric="cosine", kernel=exponential_kernel, lasso=true)
     if size(image)[3] == 1
         image = reshape(image, size(image)[1:2]...)
     else
@@ -44,12 +44,12 @@ function explain_instance(image, classifier_fn, output_selection; num_features=1
     labels = Float32.(transpose(labels))
 
     if kernel == exponential_kernel
-        distances = Float32.(pairwise_distance(data, data[1:1,:], distance_metric))
+        distances = pairwise_distance(data, data[1:1,:], distance_metric)
     else
-        distances = kernel(data[2:end,:])
+        distances = Float32.(kernel(data[2:end,:]))
     end
 
-    segments_relevance_weights = explain_instance_with_data(data, labels, distances, output_selection, num_features; kernel_fn=kernel, lasso=lasso)
+    segments_relevance_weights = explain_instance_with_data(data, labels, distances, output_selection, num_features, kernel, lasso)
     max_i, max_j = size(seg_labels_map)[1:2]
     pixel_relevance = zeros(max_i, max_j)
     for i in 1:max_i
@@ -259,7 +259,8 @@ calculates the euclidian distance between each column vector in input matrix A a
 function euclidian_distance(A::Matrix{FT},B::Matrix{FT}) where FT <: AbstractFloat
     difference = A .- B
     power_two = difference .^ 2
-    return sum(power_two, dims=2) .^ 0.5
+    out = sum(power_two, dims=2) .^ Float32(0.5)
+    return out
 end
 
 """
@@ -276,8 +277,8 @@ Computes the cosine similarity between corresponding rows of two arrays.
 """
 function cosine_similiarity(A::Matrix{FT},B::Matrix{FT}) where FT <: AbstractFloat
     scalar_product = A*B'
-    norm_A = sum(A.^2, dims=2).^0.5
-    norm_B = sum(B.^2).^0.5
+    norm_A = sum(A.^2, dims=2).^Float32(0.5)
+    norm_B = sum(B.^2).^Float32(0.5)
     return scalar_product ./ norm_A ./ norm_B
 end
 

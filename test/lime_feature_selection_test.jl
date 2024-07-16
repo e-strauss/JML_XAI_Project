@@ -8,3 +8,7 @@ df = CSV.read("../data/lars_test_Y.csv", DataFrame, types=Float32)
 y = vec(Matrix(df))
 
 selection = feature_selection(X,y, 2)
+
+@testset "feature_selection" begin
+    @test selection == [4, 5]
+end

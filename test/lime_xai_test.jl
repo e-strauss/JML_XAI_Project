@@ -22,3 +22,12 @@ save("../data/lime-goldfish-test.jpg", heat)
 @testset "LIME XAI TEST: same model output" begin
     @test expl.output == model(input)
 end
+
+analyzer = LIME(model, agnostic_kernel, false)
+expl = analyze(input, analyzer);
+heat = heatmap(expl.val)
+save("../data/lime-shap-goldfish-test.jpg", heat)
+
+@testset "LIME SHAP XAI TEST: same model output" begin
+    @test expl.output == model(input)
+end

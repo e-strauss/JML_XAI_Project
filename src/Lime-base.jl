@@ -25,7 +25,7 @@ Use LARS package: https://github.com/simonster/LARS.jl
 
 
 # Parameters
-- `X`: weighted feature
+- `X`: weighted features
 - `y`: weighted labels
 
 # Returns
@@ -44,23 +44,24 @@ function feature_selection(X, y, max_feat)
 end
 
 """
-    train_ridge_regressor(X::Matrix, y::Vector, weights::Vector)
+    train_ridge_regressor(X::Matrix{<:Real}, y::Vector{<:Real}; lam::Real, weights::Vector{Real})
 
-Returns the trained simplified linear model using ridge regression:
+Returns the trained simplified linear model as a matrix using ridge regression:
 
 # Parameters
-- `X`:
-- `y`:
+- `X::Matrix{<:Real}`: Simplified features
+- `y::Vector{<:Real}`: Corresponding labels
 
 # Returns
-- simplified linear model
+- `Vector{Float64}`: Simplified linear model
 """
-function train_ridge_regressor(X, y; lam=1, sample_weights=I)
+function train_ridge_regressor(X::Matrix{<:Real}, y::Vector{<:Real}; lam::RT=1, sample_weights=I) where RT <: Real
     if sample_weights isa Vector
 		W = Diagonal(sample_weights)
 	else
 		W = sample_weights
 	end
+
     return inv(X'*W*X + lam*I)*X'*W*y
 end
 

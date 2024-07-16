@@ -55,7 +55,7 @@ Returns the trained simplified linear model as a matrix using ridge regression:
 # Returns
 - `Vector{Float64}`: Simplified linear model
 """
-function train_ridge_regressor(X::Matrix{<:Real}, y::Vector{<:Real}; lam::<:Real=1, sample_weights=I)
+function train_ridge_regressor(X::Matrix{<:Real}, y::Vector{<:Real}; lam::RT=1, sample_weights=I) where RT <: Real
     if sample_weights isa Vector
 		W = Diagonal(sample_weights)
 	else
